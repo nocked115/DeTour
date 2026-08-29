@@ -9,12 +9,16 @@ DETOUR의 입력 화면을 읽고, 사용자의 입력이 화면에 반영되는
 - HTML: 화면의 구조
 - CSS: 색상, 크기, 간격, 반응형 레이아웃
 - JavaScript: 값, 함수, 조건문, 이벤트
-- React: Component, Props, State, Event
-- Next.js: 페이지와 프로젝트 구조
+- DOM: HTML 요소를 JavaScript로 찾아 바꾸는 방법
+- Event: 버튼 클릭 같은 사용자 행동에 반응하는 방법
+- CDN: 인터넷의 CSS/JavaScript 파일을 주소 한 줄로 가져오는 방법
+- Pico.css: 기본 버튼·입력창을 정돈해 주는 CSS 라이브러리
+
+이번 주에는 React와 Next.js를 설치하지 않는다. 빌드 도구 없이 `index.html` 한 파일로 화면과 동작을 먼저 완성한다.
 
 ## 작은 실습
 
-이름을 입력하고 버튼을 누르면 화면에 인사말을 표시한다.
+현재 위치·도착 위치·남은 시간·활동을 입력하고 버튼을 누르면 예시 DETOUR 카드 2개를 표시한다.
 
 ```jsx
 const [name, setName] = useState("");

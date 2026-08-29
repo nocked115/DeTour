@@ -6,7 +6,7 @@ DETOUR를 만드는 동안 배운 개발 개념과 실습 기록을 저장하는
 
 | 주차 | 공부 주제 | 프로젝트 적용 |
 | --- | --- | --- |
-| 1주 | HTML, CSS, JavaScript, React, Next.js | 입력 화면과 기본 결과 화면 |
+| 1주 | HTML, CSS, JavaScript, CDN, DOM Event | `index.html` 입력 화면과 예시 결과 카드 |
 | 2주 | HTTP, REST API, JSON, FastAPI, Pydantic | Frontend ↔ Backend 연결 |
 | 3주 | CSV/JSON, DB, pandas, 데이터 정제 | 장소 데이터 저장·가공 |
 | 4주 | 추천 시스템, Feature, Normalization, Weight, Score, Ranking, 서비스 통합 | 개인화 Detour 추천 |

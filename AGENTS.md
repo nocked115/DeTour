@@ -34,13 +34,18 @@ DETOUR는 사용자의 현재 조건(목적지, 남은 시간, 예산, 원하는
 
 ## 기술 방향
 
-- Frontend: React + Next.js + TypeScript
+- Week 1 Frontend: 빌드 도구 없이 `index.html` 한 파일. React·Next 설치 금지, 필요하면 Pico.css CDN 사용
+- 이후 Frontend: Week 1 완료 후 구조가 복잡해질 때 React/Next 도입 여부를 결정
 - Backend: Python + FastAPI + Pydantic
 - Data: 초기 CSV/JSON, 필요 시 SQLite 또는 PostgreSQL
 - Map: 국내 장소 데이터와 호환되는 지도 API 하나만 선정
 - Deployment: Frontend와 Backend를 배포하고 환경변수로 API key를 관리
 
 API key, `.env` 파일, 실제 개인 정보는 커밋하지 않는다.
+
+## 이번 주 수업 우선 규칙
+
+이번 주에는 실제 AI 키, 실제 장소 API, 크롤링, React/Next를 시작하지 않는다. 직접 만든 장소 20개와 예시 결과 카드 2개로 “입력 폼 → 결과 카드”를 먼저 완성한다. 자세한 수업 정리는 `docs/COURSE_WEEK1_BRIEF.md`를 따른다.
 
 ## 작업 방식
 
@@ -75,4 +80,3 @@ API key, `.env` 파일, 실제 개인 정보는 커밋하지 않는다.
 - Repository: `nocked115/DeTour`
 - Default branch: `main`
 - 원격 저장소: `https://github.com/nocked115/DeTour.git`
-
