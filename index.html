@@ -20,19 +20,33 @@
         --pico-card-background-color: #ffffff;
       }
 
-      body { background: #f6f2e9; }
+      /* 한국어는 음절 단위로 잘리면 "우회로 / 로." 처럼 읽기 나빠집니다.
+         keep-all은 단어 단위로만 줄을 바꿉니다. */
+      body { background: #f6f2e9; word-break: keep-all; }
       main { max-width: 920px; padding-top: 2.5rem; }
       .eyebrow { color: #176b47; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
       .intro { max-width: 650px; font-size: 1.1rem; }
       .helper { color: #59605b; font-size: 0.9rem; }
-      .result[hidden], .message[hidden] { display: none; }
+      .result[hidden], .message[hidden], .loading[hidden] { display: none; }
       .result-grid { display: grid; gap: 1rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .match { color: #176b47; font-weight: 700; }
-      .tag { display: inline-block; margin-right: 0.4rem; padding: 0.15rem 0.5rem; border-radius: 999px; background: #def4d0; font-size: 0.8rem; }
+
+      /* 안내 문구는 종류에 따라 색을 다르게 해서, 입력 실수와 결과 없음을 구분한다. */
+      .message { border-radius: var(--pico-border-radius); padding: 1rem; }
+      .message[data-kind="error"] { background: #fdecec; color: #8a2020; }
+      .message[data-kind="empty"] { background: #fdf4e3; color: #7a5a12; }
+      .loading { color: #59605b; }
+
+      .breakdown { color: #176b47; font-weight: 700; margin-bottom: 0.2rem; }
+      .spare { color: #59605b; font-size: 0.9rem; }
+      .tag { display: inline-block; margin: 0 0.4rem 0.4rem 0; padding: 0.15rem 0.5rem; border-radius: 999px; background: #def4d0; font-size: 0.8rem; }
 
       @media (max-width: 680px) {
         main { padding-top: 1.5rem; }
         .result-grid { grid-template-columns: 1fr; }
+        /* 모바일에서는 입력칸이 한 줄에 하나씩 오도록 한다. */
+        form .grid { grid-template-columns: 1fr; }
+        /* 손가락으로 누르기 충분한 높이를 확보한다. */
+        button[type="submit"] { min-height: 3rem; }
       }
     </style>
   </head>
@@ -89,15 +103,19 @@
               <option value="문화">문화생활을 하고 싶어요</option>
             </select>
           </label>
-          <button type="submit">작은 Detour 받아보기</button>
+          <button id="submit-button" type="submit">작은 Detour 받아보기</button>
         </form>
       </article>
 
+      <p id="loading" class="loading" aria-live="polite" hidden>조건에 맞는 코스를 찾는 중…</p>
       <section id="message" class="message" aria-live="polite" hidden></section>
       <section id="result" class="result" aria-live="polite" hidden>
         <h2 id="result-title"></h2>
         <p id="result-description" class="helper"></p>
         <div id="cards" class="result-grid"></div>
+        <p class="helper">
+          지금은 남은 시간을 알차게 쓰는 순서입니다. 점수 기반 순위(정규화·가중치)는 Week 4에 추가합니다.
+        </p>
       </section>
 
       <footer>
@@ -107,33 +125,115 @@
 
     <script>
       // 이번 주에는 외부 API 대신 직접 만든 장소 20개를 사용합니다.
+      //
+      // 필드 뜻
+      //   id            고유 키. Week 3에서 데이터베이스 primary key로 이어집니다.
+      //   area          지역 묶음. Week 3의 테스트 지역 한 곳 기준입니다.
+      //   activity      산책 | 카페 | 구경 | 문화. 입력 선택지와 1:1로 맞춥니다.
+      //   stayMinutes   그 장소에 머무는 시간(분)
+      //   travelMinutes 왕복 이동 시간(분). Week 4에 카카오 길찾기 값으로 교체합니다.
+      //   cost          1인 예상 비용(원)
+      //   tags          추천 이유를 뒷받침하는 키워드
+      //   reason        Week 1은 고정 문장. Week 4에 점수 근거 기반 자동 생성으로 교체합니다.
+      //
+      // 총 소요 시간 = stayMinutes + travelMinutes
       const places = [
-        { name: "서울숲 산책로", activity: "산책", minutes: 28, cost: 0, distance: 6, reason: "이동과 산책을 합쳐도 짧은 시간 안에 기분 전환하기 좋아요." },
-        { name: "성수 연무장길 산책", activity: "산책", minutes: 42, cost: 0, distance: 8, reason: "목적지 방향의 골목을 천천히 걸으며 새로운 가게를 발견할 수 있어요." },
-        { name: "한강 벤치 휴식", activity: "산책", minutes: 55, cost: 0, distance: 10, reason: "걷기와 잠깐 쉬는 시간을 함께 넣어도 여유가 있어요." },
-        { name: "응봉산 짧은 산책", activity: "산책", minutes: 78, cost: 0, distance: 13, reason: "시간이 충분할 때 서울 풍경을 보고 돌아오기 좋은 코스예요." },
-        { name: "테이크아웃 커피", activity: "카페", minutes: 25, cost: 4500, distance: 5, reason: "이동 시간이 짧아 커피 한 잔을 챙기고도 늦지 않아요." },
-        { name: "성수 로스터리 카페", activity: "카페", minutes: 48, cost: 7000, distance: 7, reason: "잠깐 앉아 쉬기 좋고, 목적지와도 멀지 않은 선택이에요." },
-        { name: "북카페 한 시간", activity: "카페", minutes: 62, cost: 8500, distance: 9, reason: "커피와 책을 함께 즐기며 남은 시간을 차분히 보낼 수 있어요." },
-        { name: "디저트 카페", activity: "카페", minutes: 74, cost: 10000, distance: 11, reason: "조금 더 긴 여유가 있을 때 달콤한 휴식을 더하기 좋아요." },
-        { name: "독립서점 신간 코너", activity: "구경", minutes: 30, cost: 0, distance: 6, reason: "짧은 시간에도 새로운 책과 문구를 가볍게 둘러볼 수 있어요." },
-        { name: "성수 소품숍", activity: "구경", minutes: 40, cost: 3000, distance: 7, reason: "작은 가게를 둘러보며 부담 없이 기분을 바꾸기 좋아요." },
-        { name: "서울숲 플리마켓", activity: "구경", minutes: 58, cost: 5000, distance: 9, reason: "여러 개의 작은 가게를 한 번에 구경할 수 있어요." },
-        { name: "레코드숍 탐색", activity: "구경", minutes: 72, cost: 5000, distance: 10, reason: "좋아하는 음악을 찾으며 여유를 쓰기에 알맞아요." },
-        { name: "작은 사진 전시", activity: "문화", minutes: 35, cost: 3000, distance: 6, reason: "짧은 관람으로도 새로운 분위기를 느낄 수 있어요." },
-        { name: "복합문화공간", activity: "문화", minutes: 50, cost: 0, distance: 8, reason: "전시와 상점을 함께 둘러보기 좋은 실내 선택지예요." },
-        { name: "독립영화 포스터 전시", activity: "문화", minutes: 65, cost: 5000, distance: 9, reason: "문화 공간을 가볍게 둘러보며 약속 전 시간을 채울 수 있어요." },
-        { name: "소규모 갤러리", activity: "문화", minutes: 82, cost: 8000, distance: 12, reason: "긴 여유가 있을 때 한 전시를 천천히 감상하기 좋아요." },
-        { name: "동네 공원 한 바퀴", activity: "산책", minutes: 20, cost: 0, distance: 4, reason: "30분이 안 되는 짧은 시간에도 가볍게 몸을 움직일 수 있어요." },
-        { name: "베이커리 카페", activity: "카페", minutes: 36, cost: 6000, distance: 6, reason: "간단한 빵과 음료를 고르기에 알맞은 짧은 코스예요." },
-        { name: "문구점 한 바퀴", activity: "구경", minutes: 24, cost: 2000, distance: 4, reason: "가까운 곳에서 작지만 즐거운 구경을 할 수 있어요." },
-        { name: "도서관 전시 코너", activity: "문화", minutes: 45, cost: 0, distance: 7, reason: "비용 부담 없이 조용한 문화생활을 시작할 수 있어요." }
+        { id: "seoulforest-walk", name: "서울숲 산책로", area: "성수·서울숲", activity: "산책", stayMinutes: 22, travelMinutes: 6, cost: 0, tags: ["야외", "무료"], reason: "이동과 산책을 합쳐도 짧은 시간 안에 기분 전환하기 좋아요." },
+        { id: "yeonmujang-walk", name: "성수 연무장길 산책", area: "성수·서울숲", activity: "산책", stayMinutes: 34, travelMinutes: 8, cost: 0, tags: ["야외", "구경 겸용"], reason: "목적지 방향의 골목을 천천히 걸으며 새로운 가게를 발견할 수 있어요." },
+        { id: "hangang-bench", name: "한강 벤치 휴식", area: "성수·서울숲", activity: "산책", stayMinutes: 45, travelMinutes: 10, cost: 0, tags: ["야외", "조용함"], reason: "걷기와 잠깐 쉬는 시간을 함께 넣어도 여유가 있어요." },
+        { id: "eungbongsan-walk", name: "응봉산 짧은 산책", area: "성수·서울숲", activity: "산책", stayMinutes: 65, travelMinutes: 13, cost: 0, tags: ["야외", "전망"], reason: "시간이 충분할 때 서울 풍경을 보고 돌아오기 좋은 코스예요." },
+        { id: "neighborhood-park", name: "동네 공원 한 바퀴", area: "성수·서울숲", activity: "산책", stayMinutes: 16, travelMinutes: 4, cost: 0, tags: ["야외", "가까움"], reason: "30분이 안 되는 짧은 시간에도 가볍게 몸을 움직일 수 있어요." },
+
+        { id: "takeout-coffee", name: "테이크아웃 커피", area: "성수·서울숲", activity: "카페", stayMinutes: 20, travelMinutes: 5, cost: 4500, tags: ["가까움", "빠름"], reason: "이동 시간이 짧아 커피 한 잔을 챙기고도 늦지 않아요." },
+        { id: "seongsu-roastery", name: "성수 로스터리 카페", area: "성수·서울숲", activity: "카페", stayMinutes: 41, travelMinutes: 7, cost: 7000, tags: ["실내", "앉아서 쉬기"], reason: "잠깐 앉아 쉬기 좋고, 목적지와도 멀지 않은 선택이에요." },
+        { id: "book-cafe", name: "북카페 한 시간", area: "성수·서울숲", activity: "카페", stayMinutes: 53, travelMinutes: 9, cost: 8500, tags: ["실내", "조용함"], reason: "커피와 책을 함께 즐기며 남은 시간을 차분히 보낼 수 있어요." },
+        { id: "dessert-cafe", name: "디저트 카페", area: "성수·서울숲", activity: "카페", stayMinutes: 63, travelMinutes: 11, cost: 10000, tags: ["실내", "여유"], reason: "조금 더 긴 여유가 있을 때 달콤한 휴식을 더하기 좋아요." },
+        { id: "bakery-cafe", name: "베이커리 카페", area: "성수·서울숲", activity: "카페", stayMinutes: 30, travelMinutes: 6, cost: 6000, tags: ["실내", "간단한 식사"], reason: "간단한 빵과 음료를 고르기에 알맞은 짧은 코스예요." },
+
+        { id: "indie-bookstore", name: "독립서점 신간 코너", area: "성수·서울숲", activity: "구경", stayMinutes: 24, travelMinutes: 6, cost: 0, tags: ["실내", "무료"], reason: "짧은 시간에도 새로운 책과 문구를 가볍게 둘러볼 수 있어요." },
+        { id: "seongsu-giftshop", name: "성수 소품숍", area: "성수·서울숲", activity: "구경", stayMinutes: 33, travelMinutes: 7, cost: 3000, tags: ["실내", "저예산"], reason: "작은 가게를 둘러보며 부담 없이 기분을 바꾸기 좋아요." },
+        { id: "forest-fleamarket", name: "서울숲 플리마켓", area: "성수·서울숲", activity: "구경", stayMinutes: 49, travelMinutes: 9, cost: 5000, tags: ["야외", "활기참"], reason: "여러 개의 작은 가게를 한 번에 구경할 수 있어요." },
+        { id: "record-shop", name: "레코드숍 탐색", area: "성수·서울숲", activity: "구경", stayMinutes: 62, travelMinutes: 10, cost: 5000, tags: ["실내", "취향"], reason: "좋아하는 음악을 찾으며 여유를 쓰기에 알맞아요." },
+        { id: "stationery-shop", name: "문구점 한 바퀴", area: "성수·서울숲", activity: "구경", stayMinutes: 20, travelMinutes: 4, cost: 2000, tags: ["가까움", "저예산"], reason: "가까운 곳에서 작지만 즐거운 구경을 할 수 있어요." },
+
+        { id: "photo-exhibition", name: "작은 사진 전시", area: "성수·서울숲", activity: "문화", stayMinutes: 29, travelMinutes: 6, cost: 3000, tags: ["실내", "짧은 관람"], reason: "짧은 관람으로도 새로운 분위기를 느낄 수 있어요." },
+        { id: "culture-complex", name: "복합문화공간", area: "성수·서울숲", activity: "문화", stayMinutes: 42, travelMinutes: 8, cost: 0, tags: ["실내", "무료"], reason: "전시와 상점을 함께 둘러보기 좋은 실내 선택지예요." },
+        { id: "indie-film-poster", name: "독립영화 포스터 전시", area: "성수·서울숲", activity: "문화", stayMinutes: 56, travelMinutes: 9, cost: 5000, tags: ["실내", "조용함"], reason: "문화 공간을 가볍게 둘러보며 약속 전 시간을 채울 수 있어요." },
+        { id: "small-gallery", name: "소규모 갤러리", area: "성수·서울숲", activity: "문화", stayMinutes: 70, travelMinutes: 12, cost: 8000, tags: ["실내", "여유"], reason: "긴 여유가 있을 때 한 전시를 천천히 감상하기 좋아요." },
+        { id: "library-exhibition", name: "도서관 전시 코너", area: "성수·서울숲", activity: "문화", stayMinutes: 38, travelMinutes: 7, cost: 0, tags: ["실내", "무료"], reason: "비용 부담 없이 조용한 문화생활을 시작할 수 있어요." }
       ];
 
+      const totalMinutes = (place) => place.stayMinutes + place.travelMinutes;
+
+      // 한글 받침에 따라 "로" 와 "으로" 를 골라 줍니다. (성수역으로 / 서울숲으로 / 강남로)
+      const toParticle = (word) => {
+        const code = word.charCodeAt(word.length - 1);
+        if (code < 0xac00 || code > 0xd7a3) return `${word}로`;
+        const finalConsonant = (code - 0xac00) % 28;
+        // 받침이 없거나 받침이 'ㄹ'이면 "로", 그 밖에는 "으로"
+        return finalConsonant === 0 || finalConsonant === 8 ? `${word}로` : `${word}으로`;
+      };
+
       const form = document.querySelector("#detour-form");
+      const submitButton = document.querySelector("#submit-button");
+      const loading = document.querySelector("#loading");
       const message = document.querySelector("#message");
       const result = document.querySelector("#result");
       const cards = document.querySelector("#cards");
+      const resultTitle = document.querySelector("#result-title");
+      const resultDescription = document.querySelector("#result-description");
+
+      // kind는 "error"(입력을 고쳐야 함)와 "empty"(조건에 맞는 결과가 없음)를 구분합니다.
+      const showMessage = (kind, text) => {
+        message.dataset.kind = kind;
+        message.textContent = text;
+        message.hidden = false;
+        result.hidden = true;
+        cards.innerHTML = "";
+      };
+
+      const renderCards = (candidates, time) => {
+        cards.innerHTML = candidates.map((place) => {
+          const total = totalMinutes(place);
+          const spare = time - total;
+          const tags = place.tags.map((tag) => `<span class="tag">${tag}</span>`).join("");
+          return `
+            <article>
+              <span class="tag">${place.activity}</span>
+              <h3>${place.name}</h3>
+              <p class="breakdown">총 ${total}분 · ${place.cost.toLocaleString()}원</p>
+              <p class="spare">이동 ${place.travelMinutes}분 + 머무는 시간 ${place.stayMinutes}분 · 남은 ${time}분 중 ${spare}분 여유</p>
+              <p>${place.reason}</p>
+              <p>${tags}</p>
+              <small>${place.area} · 이동 시간은 예시 값이며 실제 경로는 다음 주 API 연결 후 계산합니다.</small>
+            </article>
+          `;
+        }).join("");
+      };
+
+      const findDetours = ({ origin, destination, time, budget, activity }) => {
+        const candidates = places
+          .filter((place) =>
+            place.activity === activity &&
+            totalMinutes(place) <= time &&
+            place.cost <= budget
+          )
+          // 남은 시간 안에 들어오는 후보 중, 시간을 가장 알차게 쓰는 순서로 봅니다.
+          // (짧은 순으로 두면 90분이 비어도 20분짜리 코스를 먼저 추천하게 됩니다.)
+          .sort((first, second) => totalMinutes(second) - totalMinutes(first))
+          .slice(0, 2);
+
+        if (candidates.length === 0) {
+          showMessage("empty", "지금 조건에 맞는 예시 코스가 없어요. 시간 또는 예산을 조금 늘려보세요.");
+          return;
+        }
+
+        message.hidden = true;
+        resultTitle.textContent = `${origin}에서 ${toParticle(destination)} 가는 길의 작은 Detour`;
+        resultDescription.textContent = `${time}분, ${budget.toLocaleString()}원 이하, “${activity}”에 맞춰 고른 예시 추천이에요.`;
+        renderCards(candidates, time);
+        result.hidden = false;
+      };
 
       form.addEventListener("submit", (event) => {
         event.preventDefault();
@@ -145,38 +245,30 @@
         const activity = document.querySelector("#activity").value;
 
         if (!origin || !destination) {
-          message.textContent = "출발 위치와 도착 위치를 모두 입력해 주세요.";
-          message.hidden = false;
-          result.hidden = true;
+          showMessage("error", "출발 위치와 도착 위치를 모두 입력해 주세요.");
           return;
         }
 
-        const candidates = places
-          .filter((place) => place.activity === activity && place.minutes <= time && place.cost <= budget)
-          .sort((first, second) => first.minutes - second.minutes)
-          .slice(0, 2);
-
-        if (candidates.length === 0) {
-          message.textContent = "지금 조건에 맞는 예시 코스가 없어요. 시간 또는 예산을 조금 늘려보세요.";
-          message.hidden = false;
-          result.hidden = true;
+        if (origin === destination) {
+          showMessage("error", "출발 위치와 도착 위치가 같아요. 서로 다른 곳을 입력해 주세요.");
           return;
         }
 
+        // 지금은 브라우저 안에서 바로 계산하지만,
+        // Week 2에는 이 자리에 FastAPI로 보내는 fetch()가 들어갑니다.
+        // 그래서 기다리는 동안의 화면을 미리 만들어 둡니다.
         message.hidden = true;
-        document.querySelector("#result-title").textContent = `${origin}에서 ${destination}로 가는 길의 작은 Detour`;
-        document.querySelector("#result-description").textContent = `${time}분, ${budget.toLocaleString()}원 이하, “${activity}”에 맞춰 고른 예시 추천이에요.`;
-        cards.innerHTML = candidates.map((place, index) => `
-          <article>
-            <span class="tag">TOP ${index + 1}</span>
-            <span class="tag">${place.activity}</span>
-            <h3>${place.name}</h3>
-            <p class="match">${92 - index * 7}% Match · ${place.minutes}분 · ${place.cost.toLocaleString()}원</p>
-            <p>${place.reason}</p>
-            <small>예시 이동 시간 ${place.distance}분 · 실제 경로는 다음 주 API 연결 후 계산합니다.</small>
-          </article>
-        `).join("");
-        result.hidden = false;
+        result.hidden = true;
+        loading.hidden = false;
+        submitButton.disabled = true;
+        submitButton.setAttribute("aria-busy", "true");
+
+        window.setTimeout(() => {
+          loading.hidden = true;
+          submitButton.disabled = false;
+          submitButton.removeAttribute("aria-busy");
+          findDetours({ origin, destination, time, budget, activity });
+        }, 250);
       });
     </script>
   </body>
