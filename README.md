@@ -57,6 +57,7 @@ DETOUR는 “갈 곳이 없다”가 아니라 “선택하기 어렵다”는 �
 - [`journal/`](./journal) — 날짜별 고민·결정·회고 기록
 - [`docs/PROJECT_CONTEXT.md`](./docs/PROJECT_CONTEXT.md) — 새 세션·협업자를 위한 프로젝트 빠른 시작 안내
 - [`docs/MVP_DECISION_RULES.md`](./docs/MVP_DECISION_RULES.md) — 5주 MVP의 고정 범위와 기능 추가 기준
+- [`docs/WEEK2_API_CONTRACT.md`](./docs/WEEK2_API_CONTRACT.md) — Week 2에 붙일 FastAPI 요청·응답 형식
 - `docs/landing-preview.png` — README용 화면 미리보기
 
 ## 실행하기
@@ -64,8 +65,10 @@ DETOUR는 “갈 곳이 없다”가 아니라 “선택하기 어렵다”는 �
 현재는 별도 빌드 도구 없이 정적 HTML로 시작합니다.
 
 ```bash
-open detour-landing.html
+open index.html
 ```
+
+`index.html`은 이번 주 수업 제출본입니다. `detour-landing.html`은 프로젝트를 소개하는 랜딩 시안이라 별도로 남겨 둡니다.
 
 이번 주에는 빌드 도구 없이 `index.html` 한 파일로 화면을 완성합니다. 실제 AI와 API는 다음 주에 연결합니다. [수업 기준 Week 1 브리프](./docs/COURSE_WEEK1_BRIEF.md)를 참고하세요.
 
