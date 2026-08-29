@@ -40,10 +40,12 @@ DETOUR는 “갈 곳이 없다”가 아니라 “선택하기 어렵다”는 �
 | 주차 | 제품 구현 | 함께 공부할 기술 |
 | --- | --- | --- |
 | 1주 | `index.html` 입력 화면과 예시 결과 카드 | HTML, CSS, JavaScript, CDN, DOM Event |
-| 2주 | Frontend와 FastAPI 연결 | HTTP, REST API, JSON, Pydantic, `fetch()` |
-| 3주 | 장소 데이터 저장·정제·조회 | CSV/JSON, DB 기초, pandas, feature |
-| 4주 | 추천 시스템·TOP 3·서비스 통합 | normalization, weight, ranking |
-| 5주 | 지도·모바일 UX·배포·운영·테스트 | 지도 API, geolocation, HTTPS, production |
+| 2주 | 배포로 실제 URL 확보, FastAPI와 좌표 변환 | HTTPS, HTTP, REST API, JSON, Pydantic |
+| 3주 | 장소 데이터 정제와 Frontend ↔ Backend 연결 | feature, `fetch()`, CORS, 서버 배포 |
+| 4주 | 실제 경로 기반 TOP 3 추천, 전국 확장 | normalization, weight, score, ranking |
+| 5주 | 지도·확장 기능·사용자 테스트 | 지도 API, geolocation, 기상청/공공 API |
+
+서비스 범위는 **대한민국 전국**을 목표로 하되, 3주차까지는 서울 성수동 한 곳으로 좁혀 추천 로직을 먼저 검증합니다.
 
 ## 현재 구성
 
