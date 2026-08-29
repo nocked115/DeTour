@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ko" data-theme="light">
+<html lang="ko">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,98 +8,190 @@
       content="남은 시간에 맞는 작은 우회 코스를 추천하는 DETOUR 프로토타입"
     />
     <title>DETOUR — 작은 우회로 추천</title>
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
-    />
     <style>
+      /* 외부 CSS를 쓰지 않는다. 프레임워크가 정한 색이 사용자의 다크 모드에서
+         밝은 글씨로 바뀌는 문제가 있었고, 이 디자인은 어차피 대부분을 직접 정한다. */
       :root {
-        --pico-primary: #176b47;
-        --pico-primary-hover: #0f5335;
-        --pico-primary-focus: rgba(23, 107, 71, 0.22);
-        --pico-card-background-color: #ffffff;
+        --ink: #121212;
+        --paper: #f6f2e9;
+        --white: #fffef9;
+        --lime: #c8ff3d;
+        --green: #205f43;
+        --pink: #f6b9cc;
+        --yellow: #ffd865;
       }
 
-      /* 한국어는 음절 단위로 잘리면 "우회로 / 로." 처럼 읽기 나빠집니다.
-         keep-all은 단어 단위로만 줄을 바꿉니다. */
-      body { background: #f6f2e9; word-break: keep-all; color: #1a1c1a; }
-      /* 제목과 본문 색을 직접 지정한다.
-         지정하지 않으면 Pico.css가 정하는데, 사용자가 다크 모드면
-         밝은 글씨를 골라서 크림색 배경 위에 흰 글씨가 된다. */
-      h1, h2, h3 { color: #1a1c1a; }
-      main { max-width: 920px; padding-top: 2.5rem; }
-      .eyebrow { color: #176b47; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
-      .intro { max-width: 650px; font-size: 1.1rem; color: #3a403b; }
-      .helper { color: #59605b; font-size: 0.9rem; }
-      .result[hidden], .message[hidden], .loading[hidden] { display: none; }
-      .result-grid { display: grid; gap: 1rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
 
-      /* 안내 문구는 종류에 따라 색을 다르게 해서, 입력 실수와 결과 없음을 구분한다. */
-      .message { border-radius: var(--pico-border-radius); padding: 1rem; }
-      .message[data-kind="error"] { background: #fdecec; color: #8a2020; }
-      .message[data-kind="empty"] { background: #fdf4e3; color: #7a5a12; }
-      .loading { color: #59605b; }
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: var(--paper);
+        font-family: Arial, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+        word-break: keep-all;
+      }
 
-      .breakdown { color: #176b47; font-weight: 700; margin-bottom: 0.2rem; }
-      .spare { color: #59605b; font-size: 0.9rem; }
-      .tag { display: inline-block; margin: 0 0.4rem 0.4rem 0; padding: 0.15rem 0.5rem; border-radius: 999px; background: #def4d0; font-size: 0.8rem; }
+      button, input, select { font: inherit; }
+      button, select { cursor: pointer; }
+      a { color: inherit; text-decoration: none; }
 
-      @media (max-width: 680px) {
-        main { padding-top: 1.5rem; }
-        .result-grid { grid-template-columns: 1fr; }
-        /* 모바일에서는 입력칸이 한 줄에 하나씩 오도록 한다. */
-        form .grid { grid-template-columns: 1fr; }
-        /* 손가락으로 누르기 충분한 높이를 확보한다. */
-        button[type="submit"] { min-height: 3rem; }
+      .page { width: min(100% - 36px, 1100px); margin: 0 auto; padding: 22px 0 64px; }
+
+      /* ----- 상단 ----- */
+      .nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+      .logo { font-size: 2rem; font-weight: 900; letter-spacing: -0.08em; }
+      .logo span { color: var(--green); }
+      .nav p { margin: 0; padding: 9px 14px; border: 2px solid var(--ink); border-radius: 999px; background: var(--white); font-size: 0.75rem; font-weight: 800; }
+
+      /* ----- 히어로 ----- */
+      .hero { padding: clamp(80px, 12vw, 150px) 0 70px; }
+      .eyebrow, .features span { display: block; margin: 0 0 18px; font-size: 0.78rem; font-weight: 900; letter-spacing: 0.1em; }
+      /* 원본은 line-height 0.86, letter-spacing -0.09em이었다. 영문 기준 값이라
+         한글에서는 위아래 줄이 겹치고 자음이 붙어 보여서 조금 풀었다. */
+      .hero h1 { max-width: 760px; margin: 0; font-size: clamp(3.2rem, 10vw, 7rem); line-height: 1.05; letter-spacing: -0.045em; }
+      .hero mark { padding: 0 0.03em; background: linear-gradient(transparent 58%, var(--lime) 0, var(--lime) 92%, transparent 0); color: inherit; }
+      .intro { max-width: 620px; margin: 30px 0 26px; font-size: clamp(1rem, 2vw, 1.2rem); line-height: 1.65; }
+
+      .cta, .submit {
+        display: inline-flex; min-height: 54px; align-items: center; justify-content: center;
+        padding: 0 22px; border: 2px solid var(--ink); border-radius: 999px;
+        background: var(--ink); box-shadow: 5px 5px 0 var(--lime); color: var(--white); font-weight: 900;
+        transition: transform 160ms ease, box-shadow 160ms ease;
+      }
+      .cta:hover, .cta:focus-visible, .submit:hover, .submit:focus-visible {
+        transform: translate(3px, 3px); box-shadow: 2px 2px 0 var(--lime);
+      }
+
+      /* ----- 추천 기준 3칸 ----- */
+      .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 0 0 70px; }
+      .features article { min-height: 190px; padding: 22px; border: 2px solid var(--ink); border-radius: 22px; box-shadow: 5px 5px 0 var(--ink); }
+      .features article:nth-child(1) { background: var(--lime); }
+      .features article:nth-child(2) { background: var(--pink); }
+      .features article:nth-child(3) { background: var(--yellow); }
+      .features h2, .features p { margin: 0; }
+      .features h2 { margin-bottom: 8px; font-size: 1.35rem; }
+      .features p { line-height: 1.55; }
+
+      /* ----- 입력 패널 ----- */
+      .planner { padding: clamp(22px, 5vw, 52px); border: 2px solid var(--ink); border-radius: 28px; background: var(--green); color: var(--white); }
+      .planner-header { display: grid; grid-template-columns: 0.85fr 1.15fr; gap: 28px; align-items: end; }
+      .planner h2 { margin: 0 0 12px; font-size: clamp(2.1rem, 5vw, 3.6rem); line-height: 1.08; letter-spacing: -0.04em; }
+      .planner-header p { margin: 0; line-height: 1.55; }
+
+      .form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 24px; padding: 18px; border: 2px solid var(--white); border-radius: 20px; background: rgb(255 255 255 / 9%); }
+      .field { display: grid; gap: 7px; font-size: 0.8rem; font-weight: 900; }
+      .wide, .submit, .state { grid-column: 1 / -1; }
+      .field input, .field select { width: 100%; min-height: 48px; padding: 0 12px; border: 2px solid var(--ink); border-radius: 12px; background: var(--white); color: var(--ink); }
+      .submit { border-radius: 12px; background: var(--lime); color: var(--ink); }
+      .submit:disabled { opacity: 0.55; cursor: default; transform: none; box-shadow: 5px 5px 0 var(--lime); }
+
+      /* ----- 세 가지 상태 ----- */
+      .state[hidden], .result[hidden] { display: none; }
+      .loading { margin: 0; padding: 12px 14px; border: 2px dashed var(--white); border-radius: 12px; font-size: 0.85rem; font-weight: 800; }
+      /* 입력을 고쳐야 하는 오류와, 조건에 맞는 결과가 없는 경우를 색으로 구분한다. */
+      .message { margin: 0; padding: 12px 14px; border: 2px solid var(--ink); border-radius: 12px; font-size: 0.85rem; font-weight: 800; line-height: 1.5; }
+      .message[data-kind="error"] { background: #ffe1e1; color: #8b0000; }
+      .message[data-kind="empty"] { background: var(--white); color: var(--ink); }
+
+      /* ----- 결과 ----- */
+      .result { grid-column: 1 / -1; margin-top: 4px; }
+      .result-title { margin: 0 0 7px; font-size: 1rem; font-weight: 900; }
+      .result-note { margin: 0 0 12px; font-size: 0.82rem; line-height: 1.5; }
+      .cards { display: grid; gap: 10px; }
+      .cards article { padding: 14px; border: 2px solid var(--ink); border-radius: 12px; background: var(--white); color: var(--ink); }
+      .cards h3, .cards p { margin: 0; }
+      .cards h3 { font-size: 0.98rem; }
+      .breakdown { margin-top: 6px; color: var(--green); font-size: 0.82rem; font-weight: 900; }
+      .spare, .reason { margin-top: 8px; font-size: 0.84rem; line-height: 1.5; }
+      .spare { color: #546254; font-size: 0.76rem; }
+      .tag { display: inline-block; margin: 8px 6px 0 0; padding: 3px 9px; border: 1.5px solid var(--ink); border-radius: 999px; background: var(--lime); font-size: 0.72rem; font-weight: 800; }
+      .footnote { margin: 12px 0 0; font-size: 0.76rem; line-height: 1.5; }
+
+      .footer { display: flex; justify-content: space-between; gap: 16px; padding-top: 48px; font-size: 0.78rem; font-weight: 800; }
+
+      @media (max-width: 700px) {
+        .page { width: min(100% - 24px, 560px); padding-top: 14px; }
+        .nav p { display: none; }
+        .features, .planner-header, .form { grid-template-columns: 1fr; }
+        .features article { min-height: 0; }
+        .wide, .submit, .state, .result { grid-column: auto; }
+        .footer { flex-direction: column; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+        .cta, .submit { transition: none; }
       }
     </style>
   </head>
   <body>
-    <main class="container">
-      <header>
-        <p class="eyebrow">DETOUR · Week 1 prototype</p>
-        <h1>남는 시간을 나만의 우회로로.</h1>
+    <main class="page">
+      <nav class="nav" aria-label="주요 메뉴">
+        <a class="logo" href="#top" aria-label="DETOUR 홈">detour<span>.</span></a>
+        <p>Shortest isn't always best.</p>
+      </nav>
+
+      <section class="hero" id="top">
+        <p class="eyebrow">YOUR SPARE TIME, YOUR LITTLE ROUTE</p>
+        <h1>30분 남았어?<br /><mark>그냥 보내지 마.</mark></h1>
         <p class="intro">
-          목적지에 바로 가기엔 아쉬운 시간. 지금 조건에 맞는 작은 Detour를 찾아드려요.
+          목적지에 바로 가기엔 아쉽고, 뭘 하기엔 애매한 시간.<br />
+          DETOUR가 지금의 조건에 맞는 작은 우회로를 골라드려요.
         </p>
-      </header>
+        <a class="cta" href="#planner">내 Detour 찾기 →</a>
+      </section>
 
-      <article>
-        <h2>오늘의 빈칸을 채워볼까요?</h2>
-        <p class="helper">지금은 직접 만든 장소 데이터 20개로 동작하는 프로토타입이에요.</p>
+      <section class="features" aria-label="DETOUR 추천 기준">
+        <article>
+          <span>01 · TIME FIT</span>
+          <h2>시간 안에 딱</h2>
+          <p>현재 위치에서 들렀다가 목적지에 도착할 수 있는지 먼저 확인해요.</p>
+        </article>
+        <article>
+          <span>02 · CONTEXT FIT</span>
+          <h2>날씨와 분위기까지</h2>
+          <p>비 오는 날엔 실내를, 조용히 쉬고 싶다면 덜 붐비는 곳을 우선해요.</p>
+        </article>
+        <article>
+          <span>03 · CLEAR REASON</span>
+          <h2>이유까지 분명하게</h2>
+          <p>시간·비용을 함께 보여줘서 직접 납득하고 선택할 수 있어요.</p>
+        </article>
+      </section>
 
-        <form id="detour-form">
-          <div class="grid">
-            <label>
-              출발 위치
-              <input id="origin" name="origin" placeholder="예: 서울숲역" required />
-            </label>
-            <label>
-              도착 위치
-              <input id="destination" name="destination" placeholder="예: 성수역" required />
-            </label>
-          </div>
-          <div class="grid">
-            <label>
-              남은 시간
-              <select id="time" name="time">
-                <option value="30">30분</option>
-                <option value="60" selected>60분</option>
-                <option value="90">90분</option>
-              </select>
-            </label>
-            <label>
-              예산
-              <select id="budget" name="budget">
-                <option value="0">무료</option>
-                <option value="5000">5,000원 이하</option>
-                <option value="10000" selected>10,000원 이하</option>
-                <option value="20000">20,000원 이하</option>
-              </select>
-            </label>
-          </div>
-          <label>
-            하고 싶은 것
+      <section class="planner" id="planner">
+        <div class="planner-header">
+          <h2>오늘의<br />빈칸</h2>
+          <p>
+            지금 있는 곳, 가야 할 곳, 남은 시간을 알려주세요.
+            직접 만든 장소 20개로 동작하는 프로토타입입니다.
+          </p>
+        </div>
+
+        <form class="form" id="detour-form">
+          <label class="field">출발 위치
+            <input id="origin" name="origin" placeholder="예: 서울숲역" required />
+          </label>
+          <label class="field">도착 위치
+            <input id="destination" name="destination" placeholder="예: 성수역" required />
+          </label>
+          <label class="field">남은 시간
+            <select id="time" name="time">
+              <option value="30">30분</option>
+              <option value="60" selected>60분</option>
+              <option value="90">90분</option>
+            </select>
+          </label>
+          <label class="field">예산
+            <select id="budget" name="budget">
+              <option value="0">무료</option>
+              <option value="5000">5,000원 이하</option>
+              <option value="10000" selected>10,000원 이하</option>
+              <option value="20000">20,000원 이하</option>
+            </select>
+          </label>
+          <label class="field wide">하고 싶은 것
             <select id="activity" name="activity">
               <option value="산책">가볍게 걷고 싶어요</option>
               <option value="카페" selected>카페에서 쉬고 싶어요</option>
@@ -107,23 +199,26 @@
               <option value="문화">문화생활을 하고 싶어요</option>
             </select>
           </label>
-          <button id="submit-button" type="submit">작은 Detour 받아보기</button>
-        </form>
-      </article>
 
-      <p id="loading" class="loading" aria-live="polite" hidden>조건에 맞는 코스를 찾는 중…</p>
-      <section id="message" class="message" aria-live="polite" hidden></section>
-      <section id="result" class="result" aria-live="polite" hidden>
-        <h2 id="result-title"></h2>
-        <p id="result-description" class="helper"></p>
-        <div id="cards" class="result-grid"></div>
-        <p class="helper">
-          지금은 남은 시간을 알차게 쓰는 순서입니다. 점수 기반 순위(정규화·가중치)는 Week 4에 추가합니다.
-        </p>
+          <button class="submit" id="submit-button" type="submit">작은 Detour 받아보기</button>
+
+          <p id="loading" class="state loading" aria-live="polite" hidden>조건에 맞는 코스를 찾는 중…</p>
+          <p id="message" class="state message" aria-live="polite" hidden></p>
+
+          <section id="result" class="result" aria-live="polite" hidden>
+            <p class="result-title" id="result-title"></p>
+            <p class="result-note" id="result-description"></p>
+            <div id="cards" class="cards"></div>
+            <p class="footnote">
+              남은 시간을 알차게 쓰는 순서입니다. 점수 기반 순위는 Week 4에 추가합니다.
+            </p>
+          </section>
+        </form>
       </section>
 
-      <footer>
-        <small>DETOUR Week 1 · 더미 데이터 프로토타입 · 실제 API는 다음 주에 연결합니다.</small>
+      <footer class="footer">
+        <span>DETOUR © 2026</span>
+        <span>가장 빠른 길이 아니라, 나에게 맞는 길.</span>
       </footer>
     </main>
 
