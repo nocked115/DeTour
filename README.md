@@ -60,6 +60,7 @@ DETOUR는 “갈 곳이 없다”가 아니라 “선택하기 어렵다”는 �
 - [`docs/PROJECT_CONTEXT.md`](./docs/PROJECT_CONTEXT.md) — 새 세션·협업자를 위한 프로젝트 빠른 시작 안내
 - [`docs/MVP_DECISION_RULES.md`](./docs/MVP_DECISION_RULES.md) — 5주 MVP의 고정 범위와 기능 추가 기준
 - [`docs/WEEK2_API_CONTRACT.md`](./docs/WEEK2_API_CONTRACT.md) — Week 2에 붙일 FastAPI 요청·응답 형식
+- [`docs/PLACE_RULES.md`](./docs/PLACE_RULES.md) — 장소 유형별 체류 시간·비용 규칙표
 - `docs/landing-preview.png` — README용 화면 미리보기
 
 ## 디자인 파일
