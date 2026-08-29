@@ -65,3 +65,22 @@ const [name, setName] = useState("");
 - 관련 커밋:
 - 관련 Issue:
 
+## Day 2 — React와 Next.js 구조
+
+### 이 프로젝트에서의 Component
+
+- `frontend/src/app/page.tsx`: 제목, 소개, 추천 기준처럼 정적인 첫 화면을 배치한다.
+- `frontend/src/app/detour-planner.tsx`: 사용자의 입력과 버튼 클릭에 반응하는 추천 입력·결과 영역이다.
+
+### 이 프로젝트에서의 State
+
+`DetourPlanner`의 `form` State는 현재 위치, 도착 위치, 시간, 예산, 날씨, 활동, 혼잡도 선호를 기억한다. 사용자가 값을 바꾸면 `updateField()`가 State를 새 값으로 갱신한다.
+
+### 이 프로젝트에서의 Event
+
+- `onChange`: 사용자가 입력칸이나 선택 메뉴의 값을 바꿀 때 실행된다.
+- `onSubmit`: 사용자가 `작은 Detour 받아보기` 버튼을 눌렀을 때 실행된다.
+
+### 왜 Client Component인가
+
+Next.js의 `page.tsx`는 기본적으로 Server Component다. 반면 `useState`, `onChange`, `onSubmit`처럼 브라우저에서 반응해야 하는 `detour-planner.tsx` 파일 맨 위에는 `"use client"`를 선언한다.
