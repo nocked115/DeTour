@@ -359,14 +359,48 @@
       display: none;
       grid-column: 1 / -1;
       margin: 5px 0 0;
-      padding: 15px;
-      border-radius: 12px;
-      background: var(--white);
       color: var(--ink);
-      line-height: 1.5;
     }
 
     .result.show { display: block; }
+
+    .result-title {
+      margin: 0 0 10px;
+      font-size: 0.95rem;
+      font-weight: 900;
+    }
+
+    .recommendation-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .recommendation-card {
+      padding: 14px;
+      border: 2px solid var(--ink);
+      border-radius: 12px;
+      background: var(--white);
+    }
+
+    .recommendation-card h3,
+    .recommendation-card p { margin: 0; }
+
+    .recommendation-card h3 {
+      font-size: 0.95rem;
+    }
+
+    .recommendation-meta {
+      margin-top: 6px !important;
+      color: var(--green);
+      font-size: 0.8rem;
+      font-weight: 900;
+    }
+
+    .recommendation-reason {
+      margin-top: 8px !important;
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
 
     /* ===== 강사 피드백 교체 영역 ===== */
     .feedback {
@@ -494,7 +528,7 @@
             </select>
           </label>
           <button class="demo-button" id="recommendButton" type="button">작은 Detour 받아보기</button>
-          <p class="result" id="result" role="status" aria-live="polite"></p>
+          <div class="result" id="result" role="status" aria-live="polite"></div>
         </div>
       </div>
 
@@ -519,17 +553,53 @@
 
   <script>
     // ===== 간단한 추천 체험 데이터 =====
-    // 실제 API 대신 아래 문장을 수정해 포트폴리오용 예시를 만들 수 있습니다.
+    // 실제 API 대신, 선택값별 임시 추천 카드 3개를 보여줍니다.
     const recommendations = {
-      "30-산책": "동네 공원 한 바퀴 어때요? 이동 8분 + 산책 15분, 예상 비용 0원이에요.",
-      "30-카페": "가까운 테이크아웃 카페를 추천해요. 이동 10분 + 커피 한 잔, 예상 비용 6,000원이에요.",
-      "30-구경": "근처 독립서점의 신간 코너를 둘러보세요. 총 27분이면 충분해요.",
-      "60-산책": "천천히 걷기 좋은 녹지 코스를 추천해요. 이동 포함 약 55분이에요.",
-      "60-카페": "분위기 좋은 카페에서 35분 쉬어가세요. 총 58분, 예상 비용 9,000원이에요.",
-      "60-구경": "소품숍과 서점을 잇는 작은 구경 코스예요. 총 52분, 예상 비용 5,000원이에요.",
-      "90-산책": "공원과 수변 산책로를 잇는 여유 코스예요. 총 82분이면 다녀올 수 있어요.",
-      "90-카페": "산책 25분 뒤 카페에서 쉬는 코스를 추천해요. 총 86분, 예상 비용 12,000원이에요.",
-      "90-구경": "전시 공간과 소품숍을 잇는 동네 탐색 코스예요. 총 88분, 예상 비용 15,000원이에요."
+      "30-산책": [
+        ["동네 공원 한 바퀴", "92% Match · 23분 · 0원", "이동 8분과 산책 15분으로, 짧은 시간 안에 가볍게 걷기 좋아요."],
+        ["골목길 사진 산책", "85% Match · 28분 · 0원", "가까운 골목을 천천히 둘러보며 잠깐 기분 전환할 수 있어요."],
+        ["작은 쉼터 들르기", "78% Match · 20분 · 0원", "앉아서 쉬는 시간까지 포함해도 약속 전에 여유가 있어요."]
+      ],
+      "30-카페": [
+        ["가까운 테이크아웃 카페", "93% Match · 25분 · 6,000원", "이동 시간이 짧아 커피 한 잔을 챙기고도 늦지 않아요."],
+        ["동네 베이커리", "84% Match · 29분 · 5,000원", "간단한 빵과 음료를 고르기에 알맞은 짧은 코스예요."],
+        ["조용한 카페 창가", "76% Match · 30분 · 7,000원", "잠깐 앉아 쉬고 싶을 때 선택할 수 있어요."]
+      ],
+      "30-구경": [
+        ["독립서점 신간 코너", "90% Match · 27분 · 0원", "짧은 시간에도 새로운 책을 둘러볼 수 있어요."],
+        ["문구점 한 바퀴", "83% Match · 22분 · 3,000원", "가볍게 구경하고 작은 물건 하나를 고르기 좋아요."],
+        ["동네 전시 포스터", "75% Match · 26분 · 0원", "주변 문화 공간의 다음 전시를 발견할 수 있어요."]
+      ],
+      "60-산책": [
+        ["녹지 산책로", "94% Match · 55분 · 0원", "천천히 걸어도 남은 시간 안에 돌아올 수 있어요."],
+        ["하천 산책 코스", "87% Match · 51분 · 0원", "물가를 따라 걷는 길이라 잠시 머리를 식히기 좋아요."],
+        ["동네 공원 + 벤치 휴식", "79% Match · 48분 · 0원", "걷기와 휴식을 함께 넣어 무리 없는 코스예요."]
+      ],
+      "60-카페": [
+        ["분위기 좋은 카페", "93% Match · 58분 · 9,000원", "35분 동안 쉬어도 이동 시간을 충분히 확보할 수 있어요."],
+        ["로스터리 카페", "86% Match · 52분 · 8,000원", "커피를 좋아한다면 조금 더 특별한 한 잔을 즐길 수 있어요."],
+        ["카페 + 짧은 산책", "77% Match · 56분 · 7,000원", "앉아 있기보다 가볍게 걸으며 쉬고 싶을 때 어울려요."]
+      ],
+      "60-구경": [
+        ["소품숍과 서점", "91% Match · 52분 · 5,000원", "서로 가까운 두 곳을 이어 부담 없이 둘러볼 수 있어요."],
+        ["작은 전시 공간", "84% Match · 50분 · 6,000원", "짧은 전시 하나를 보고 새로운 기분을 느껴보세요."],
+        ["로컬 마켓 구경", "76% Match · 57분 · 8,000원", "동네의 작은 가게들을 천천히 구경하기 좋아요."]
+      ],
+      "90-산책": [
+        ["공원과 수변 산책로", "95% Match · 82분 · 0원", "충분한 시간으로 여유 있게 걷고 돌아올 수 있어요."],
+        ["동네 언덕길 산책", "87% Match · 75분 · 0원", "평소 지나치던 동네를 조금 다르게 볼 수 있는 코스예요."],
+        ["산책 + 작은 공원 휴식", "80% Match · 78분 · 0원", "걷는 속도를 늦추고 쉬는 시간까지 챙길 수 있어요."]
+      ],
+      "90-카페": [
+        ["산책 후 카페 휴식", "94% Match · 86분 · 12,000원", "25분 산책 뒤 카페에서 천천히 쉬기 좋은 구성입니다."],
+        ["브런치 카페", "86% Match · 84분 · 15,000원", "예산 안에서 가벼운 식사와 휴식을 함께 할 수 있어요."],
+        ["북카페 한 시간", "78% Match · 80분 · 10,000원", "읽고 싶던 책을 펼치기에 충분한 시간을 만들 수 있어요."]
+      ],
+      "90-구경": [
+        ["전시 공간과 소품숍", "92% Match · 88분 · 15,000원", "전시와 구경을 함께 해도 약속 전 시간을 지킬 수 있어요."],
+        ["동네 탐색 코스", "85% Match · 79분 · 7,000원", "평소 몰랐던 가게와 골목을 발견하기 좋아요."],
+        ["서점 + 레코드숍", "77% Match · 83분 · 5,000원", "관심 가는 것들을 천천히 둘러보기에 알맞아요."]
+      ]
     };
 
     const timeSelect = document.getElementById("timeSelect");
@@ -540,7 +610,20 @@
     // 버튼 클릭 시 선택한 시간과 기분에 맞는 예시 결과를 보여줍니다.
     recommendButton.addEventListener("click", () => {
       const key = `${timeSelect.value}-${moodSelect.value}`;
-      result.textContent = `추천 완료! ${recommendations[key]}`;
+      const cards = recommendations[key];
+
+      result.innerHTML = `
+        <p class="result-title">${timeSelect.value}분 동안 ${moodSelect.value}하고 싶다면</p>
+        <div class="recommendation-list">
+          ${cards.map(([name, meta, reason], index) => `
+            <article class="recommendation-card">
+              <h3>TOP ${index + 1}. ${name}</h3>
+              <p class="recommendation-meta">${meta}</p>
+              <p class="recommendation-reason">${reason}</p>
+            </article>
+          `).join("")}
+        </div>
+      `;
       result.classList.add("show");
     });
   </script>
