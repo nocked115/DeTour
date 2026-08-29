@@ -42,8 +42,8 @@ DETOUR는 “갈 곳이 없다”가 아니라 “선택하기 어렵다”는 �
 | 1주 | 입력 화면과 기본 결과 화면 | HTML, CSS, JavaScript, React, Next.js |
 | 2주 | Frontend와 FastAPI 연결 | HTTP, REST API, JSON, Pydantic, `fetch()` |
 | 3주 | 장소 데이터 저장·정제·조회 | CSV/JSON, DB 기초, pandas, feature |
-| 4주 | 추천 점수·TOP 3·지도 통합 | normalization, weight, ranking, 지도 API |
-| 5주 | 배포·사용자 테스트·개선 | 환경변수, HTTPS, production, GitHub 운영 |
+| 4주 | 추천 시스템·TOP 3·서비스 통합 | normalization, weight, ranking |
+| 5주 | 지도·모바일 UX·배포·운영·테스트 | 지도 API, geolocation, HTTPS, production |
 
 ## 현재 구성
 

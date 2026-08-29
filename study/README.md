@@ -9,8 +9,8 @@ DETOUR를 만드는 동안 배운 개발 개념과 실습 기록을 저장하는
 | 1주 | HTML, CSS, JavaScript, React, Next.js | 입력 화면과 기본 결과 화면 |
 | 2주 | HTTP, REST API, JSON, FastAPI, Pydantic | Frontend ↔ Backend 연결 |
 | 3주 | CSV/JSON, DB, pandas, 데이터 정제 | 장소 데이터 저장·가공 |
-| 4주 | Feature, Normalization, Weight, Score, Ranking, 지도 API | 개인화 추천과 지도 |
-| 5주 | 환경변수, 배포, HTTPS, 테스트, GitHub 운영 | 실제 서비스 배포와 개선 |
+| 4주 | 추천 시스템, Feature, Normalization, Weight, Score, Ranking, 서비스 통합 | 개인화 Detour 추천 |
+| 5주 | 서버, 지도 API, Geolocation, 배포, HTTPS, 운영, 테스트 | 실제 서비스 배포 |
 
 ## 매주 기록할 것
 
@@ -23,4 +23,3 @@ DETOUR를 만드는 동안 배운 개발 개념과 실습 기록을 저장하는
 ## 학습 기록
 
 - [Week 1 — Frontend와 웹 구조](./week-01-frontend.md)
-
