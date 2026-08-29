@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="남은 시간에 맞는 작은 우회 코스를 추천하는 DETOUR 프로토타입"
+    />
+    <title>DETOUR — 작은 우회로 추천</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
+    />
+    <style>
+      :root {
+        --pico-primary: #176b47;
+        --pico-primary-hover: #0f5335;
+        --pico-primary-focus: rgba(23, 107, 71, 0.22);
+        --pico-card-background-color: #ffffff;
+      }
+
+      body { background: #f6f2e9; }
+      main { max-width: 920px; padding-top: 2.5rem; }
+      .eyebrow { color: #176b47; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+      .intro { max-width: 650px; font-size: 1.1rem; }
+      .helper { color: #59605b; font-size: 0.9rem; }
+      .result[hidden], .message[hidden] { display: none; }
+      .result-grid { display: grid; gap: 1rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .match { color: #176b47; font-weight: 700; }
+      .tag { display: inline-block; margin-right: 0.4rem; padding: 0.15rem 0.5rem; border-radius: 999px; background: #def4d0; font-size: 0.8rem; }
+
+      @media (max-width: 680px) {
+        main { padding-top: 1.5rem; }
+        .result-grid { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      <header>
+        <p class="eyebrow">DETOUR · Week 1 prototype</p>
+        <h1>남는 시간을 나만의 우회로로.</h1>
+        <p class="intro">
+          목적지에 바로 가기엔 아쉬운 시간. 지금 조건에 맞는 작은 Detour를 찾아드려요.
+        </p>
+      </header>
+
+      <article>
+        <h2>오늘의 빈칸을 채워볼까요?</h2>
+        <p class="helper">지금은 직접 만든 장소 데이터 20개로 동작하는 프로토타입이에요.</p>
+
+        <form id="detour-form">
+          <div class="grid">
+            <label>
+              출발 위치
+              <input id="origin" name="origin" placeholder="예: 서울숲역" required />
+            </label>
+            <label>
+              도착 위치
+              <input id="destination" name="destination" placeholder="예: 성수역" required />
+            </label>
+          </div>
+          <div class="grid">
+            <label>
+              남은 시간
+              <select id="time" name="time">
+                <option value="30">30분</option>
+                <option value="60" selected>60분</option>
+                <option value="90">90분</option>
+              </select>
+            </label>
+            <label>
+              예산
+              <select id="budget" name="budget">
+                <option value="0">무료</option>
+                <option value="5000">5,000원 이하</option>
+                <option value="10000" selected>10,000원 이하</option>
+                <option value="20000">20,000원 이하</option>
+              </select>
+            </label>
+          </div>
+          <label>
+            하고 싶은 것
+            <select id="activity" name="activity">
+              <option value="산책">가볍게 걷고 싶어요</option>
+              <option value="카페" selected>카페에서 쉬고 싶어요</option>
+              <option value="구경">구경하고 싶어요</option>
+              <option value="문화">문화생활을 하고 싶어요</option>
+            </select>
+          </label>
+          <button type="submit">작은 Detour 받아보기</button>
+        </form>
+      </article>
+
+      <section id="message" class="message" aria-live="polite" hidden></section>
+      <section id="result" class="result" aria-live="polite" hidden>
+        <h2 id="result-title"></h2>
+        <p id="result-description" class="helper"></p>
+        <div id="cards" class="result-grid"></div>
+      </section>
+
+      <footer>
+        <small>DETOUR Week 1 · 더미 데이터 프로토타입 · 실제 API는 다음 주에 연결합니다.</small>
+      </footer>
+    </main>
+
+    <script>
+      // 이번 주에는 외부 API 대신 직접 만든 장소 20개를 사용합니다.
+      const places = [
+        { name: "서울숲 산책로", activity: "산책", minutes: 28, cost: 0, distance: 6, reason: "이동과 산책을 합쳐도 짧은 시간 안에 기분 전환하기 좋아요." },
+        { name: "성수 연무장길 산책", activity: "산책", minutes: 42, cost: 0, distance: 8, reason: "목적지 방향의 골목을 천천히 걸으며 새로운 가게를 발견할 수 있어요." },
+        { name: "한강 벤치 휴식", activity: "산책", minutes: 55, cost: 0, distance: 10, reason: "걷기와 잠깐 쉬는 시간을 함께 넣어도 여유가 있어요." },
+        { name: "응봉산 짧은 산책", activity: "산책", minutes: 78, cost: 0, distance: 13, reason: "시간이 충분할 때 서울 풍경을 보고 돌아오기 좋은 코스예요." },
+        { name: "테이크아웃 커피", activity: "카페", minutes: 25, cost: 4500, distance: 5, reason: "이동 시간이 짧아 커피 한 잔을 챙기고도 늦지 않아요." },
+        { name: "성수 로스터리 카페", activity: "카페", minutes: 48, cost: 7000, distance: 7, reason: "잠깐 앉아 쉬기 좋고, 목적지와도 멀지 않은 선택이에요." },
+        { name: "북카페 한 시간", activity: "카페", minutes: 62, cost: 8500, distance: 9, reason: "커피와 책을 함께 즐기며 남은 시간을 차분히 보낼 수 있어요." },
+        { name: "디저트 카페", activity: "카페", minutes: 74, cost: 10000, distance: 11, reason: "조금 더 긴 여유가 있을 때 달콤한 휴식을 더하기 좋아요." },
+        { name: "독립서점 신간 코너", activity: "구경", minutes: 30, cost: 0, distance: 6, reason: "짧은 시간에도 새로운 책과 문구를 가볍게 둘러볼 수 있어요." },
+        { name: "성수 소품숍", activity: "구경", minutes: 40, cost: 3000, distance: 7, reason: "작은 가게를 둘러보며 부담 없이 기분을 바꾸기 좋아요." },
+        { name: "서울숲 플리마켓", activity: "구경", minutes: 58, cost: 5000, distance: 9, reason: "여러 개의 작은 가게를 한 번에 구경할 수 있어요." },
+        { name: "레코드숍 탐색", activity: "구경", minutes: 72, cost: 5000, distance: 10, reason: "좋아하는 음악을 찾으며 여유를 쓰기에 알맞아요." },
+        { name: "작은 사진 전시", activity: "문화", minutes: 35, cost: 3000, distance: 6, reason: "짧은 관람으로도 새로운 분위기를 느낄 수 있어요." },
+        { name: "복합문화공간", activity: "문화", minutes: 50, cost: 0, distance: 8, reason: "전시와 상점을 함께 둘러보기 좋은 실내 선택지예요." },
+        { name: "독립영화 포스터 전시", activity: "문화", minutes: 65, cost: 5000, distance: 9, reason: "문화 공간을 가볍게 둘러보며 약속 전 시간을 채울 수 있어요." },
+        { name: "소규모 갤러리", activity: "문화", minutes: 82, cost: 8000, distance: 12, reason: "긴 여유가 있을 때 한 전시를 천천히 감상하기 좋아요." },
+        { name: "동네 공원 한 바퀴", activity: "산책", minutes: 20, cost: 0, distance: 4, reason: "30분이 안 되는 짧은 시간에도 가볍게 몸을 움직일 수 있어요." },
+        { name: "베이커리 카페", activity: "카페", minutes: 36, cost: 6000, distance: 6, reason: "간단한 빵과 음료를 고르기에 알맞은 짧은 코스예요." },
+        { name: "문구점 한 바퀴", activity: "구경", minutes: 24, cost: 2000, distance: 4, reason: "가까운 곳에서 작지만 즐거운 구경을 할 수 있어요." },
+        { name: "도서관 전시 코너", activity: "문화", minutes: 45, cost: 0, distance: 7, reason: "비용 부담 없이 조용한 문화생활을 시작할 수 있어요." }
+      ];
+
+      const form = document.querySelector("#detour-form");
+      const message = document.querySelector("#message");
+      const result = document.querySelector("#result");
+      const cards = document.querySelector("#cards");
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        const origin = document.querySelector("#origin").value.trim();
+        const destination = document.querySelector("#destination").value.trim();
+        const time = Number(document.querySelector("#time").value);
+        const budget = Number(document.querySelector("#budget").value);
+        const activity = document.querySelector("#activity").value;
+
+        if (!origin || !destination) {
+          message.textContent = "출발 위치와 도착 위치를 모두 입력해 주세요.";
+          message.hidden = false;
+          result.hidden = true;
+          return;
+        }
+
+        const candidates = places
+          .filter((place) => place.activity === activity && place.minutes <= time && place.cost <= budget)
+          .sort((first, second) => first.minutes - second.minutes)
+          .slice(0, 2);
+
+        if (candidates.length === 0) {
+          message.textContent = "지금 조건에 맞는 예시 코스가 없어요. 시간 또는 예산을 조금 늘려보세요.";
+          message.hidden = false;
+          result.hidden = true;
+          return;
+        }
+
+        message.hidden = true;
+        document.querySelector("#result-title").textContent = `${origin}에서 ${destination}로 가는 길의 작은 Detour`;
+        document.querySelector("#result-description").textContent = `${time}분, ${budget.toLocaleString()}원 이하, “${activity}”에 맞춰 고른 예시 추천이에요.`;
+        cards.innerHTML = candidates.map((place, index) => `
+          <article>
+            <span class="tag">TOP ${index + 1}</span>
+            <span class="tag">${place.activity}</span>
+            <h3>${place.name}</h3>
+            <p class="match">${92 - index * 7}% Match · ${place.minutes}분 · ${place.cost.toLocaleString()}원</p>
+            <p>${place.reason}</p>
+            <small>예시 이동 시간 ${place.distance}분 · 실제 경로는 다음 주 API 연결 후 계산합니다.</small>
+          </article>
+        `).join("");
+        result.hidden = false;
+      });
+    </script>
+  </body>
+</html>

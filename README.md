@@ -48,6 +48,8 @@ DETOUR는 “갈 곳이 없다”가 아니라 “선택하기 어렵다”는 �
 ## 현재 구성
 
 - `detour-landing.html` — 현재 랜딩 페이지 시안
+- `index.html` — Week 1 수업 제출용 정적 프로토타입
+- `frontend/` — 보관 중인 Next.js 실험 프로토타입(이번 주 제출 범위 아님)
 - `DETOUR_PROJECT_SPEC.md` — 제품 및 기술 명세
 - `DETOUR_5WEEK_HANDOFF.md` — 5주 구현 계획과 인수인계 문서
 - [`PLAN.md`](./PLAN.md) — 5주 주간·일간 실행 계획
