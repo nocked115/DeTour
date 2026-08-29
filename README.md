@@ -50,7 +50,9 @@ DETOUR는 “갈 곳이 없다”가 아니라 “선택하기 어렵다”는 �
 - `detour-landing.html` — 현재 랜딩 페이지 시안
 - `DETOUR_PROJECT_SPEC.md` — 제품 및 기술 명세
 - `DETOUR_5WEEK_HANDOFF.md` — 5주 구현 계획과 인수인계 문서
+- [`PLAN.md`](./PLAN.md) — 5주 주간·일간 실행 계획
 - [`study/`](./study) — 주차별 학습 기록
+- [`journal/`](./journal) — 날짜별 고민·결정·회고 기록
 - `docs/landing-preview.png` — README용 화면 미리보기
 
 ## 실행하기
