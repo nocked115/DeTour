@@ -66,6 +66,10 @@ DETOUR는 “갈 곳이 없다”가 아니라 “선택하기 어렵다”는 �
 
 - [DETOUR 화면 상태 지도 (Figma)](https://www.figma.com/design/Ca1n7y6VmEO9xDv5EweJTQ) — 화면 9개의 상태와 각각이 언제 뜨는지, 어느 주차에 구현하는지 정리
 
+## 배포된 웹
+
+https://nocked115.github.io/DeTour/
+
 ## 실행하기
 
 현재는 별도 빌드 도구 없이 정적 HTML로 시작합니다.
