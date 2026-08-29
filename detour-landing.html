@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="남는 시간을 취향에 맞는 작은 외출로 바꾸는 DETOUR">
+  <title>DETOUR — 남는 시간을 나만의 우회로로</title>
+  <style>
+    /* ===== 기본 디자인 값: 색상을 바꾸고 싶다면 이 부분부터 수정하세요. ===== */
+    :root {
+      --lime: #c8ff3d;
+      --green: #205f43;
+      --ink: #121212;
+      --paper: #f6f2e9;
+      --pink: #f6b9cc;
+      --blue: #bcd9ff;
+      --yellow: #ffd865;
+      --white: #fffef9;
+      --line: 2px solid var(--ink);
+      --shadow: 7px 7px 0 var(--ink);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: Arial, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    }
+
+    button, select { font: inherit; }
+
+    .page {
+      width: min(1180px, calc(100% - 36px));
+      margin: 0 auto;
+      padding: 22px 0 64px;
+    }
+
+    /* ===== 상단 로고와 메뉴 ===== */
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 34px;
+    }
+
+    .logo {
+      color: var(--ink);
+      font-size: clamp(1.45rem, 3vw, 2.1rem);
+      font-weight: 900;
+      letter-spacing: -0.08em;
+      text-decoration: none;
+    }
+
+    .logo-dot { color: var(--green); }
+
+    .nav-note {
+      margin: 0;
+      padding: 9px 14px;
+      border: var(--line);
+      border-radius: 999px;
+      background: var(--white);
+      font-size: 0.78rem;
+      font-weight: 800;
+    }
+
+    /* ===== 첫 화면의 큰 소개 영역 ===== */
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(310px, 0.8fr);
+      gap: clamp(24px, 5vw, 70px);
+      align-items: center;
+      min-height: 620px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      margin: 0 0 20px;
+      font-size: 0.8rem;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 12px;
+      height: 12px;
+      border: var(--line);
+      border-radius: 50%;
+      background: var(--lime);
+    }
+
+    h1 {
+      max-width: 760px;
+      margin: 0;
+      font-size: clamp(3.25rem, 8.5vw, 7.5rem);
+      line-height: 0.88;
+      letter-spacing: -0.085em;
+    }
+
+    .highlight {
+      position: relative;
+      display: inline-block;
+      z-index: 0;
+    }
+
+    .highlight::after {
+      content: "";
+      position: absolute;
+      left: -2%;
+      right: -4%;
+      bottom: 2%;
+      height: 29%;
+      background: var(--lime);
+      transform: rotate(-1.5deg);
+      z-index: -1;
+    }
+
+    .intro {
+      max-width: 590px;
+      margin: 28px 0 26px;
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      line-height: 1.65;
+      word-break: keep-all;
+    }
+
+    .cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 17px;
+    }
+
+    .cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 56px;
+      padding: 0 24px;
+      border: var(--line);
+      border-radius: 999px;
+      color: var(--white);
+      background: var(--ink);
+      box-shadow: 5px 5px 0 var(--lime);
+      font-weight: 900;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform 160ms ease, box-shadow 160ms ease;
+    }
+
+    .cta:hover,
+    .cta:focus-visible {
+      transform: translate(3px, 3px);
+      box-shadow: 2px 2px 0 var(--lime);
+    }
+
+    .micro-copy { font-size: 0.82rem; font-weight: 800; }
+
+    /* ===== CSS 도형만으로 만든 우회 경로 일러스트 ===== */
+    .route-art {
+      position: relative;
+      min-height: 500px;
+      border: var(--line);
+      border-radius: 42% 42% 26px 26px;
+      overflow: hidden;
+      background: var(--blue);
+      box-shadow: var(--shadow);
+    }
+
+    .sun {
+      position: absolute;
+      top: 34px;
+      right: 30px;
+      width: 96px;
+      height: 96px;
+      border: var(--line);
+      border-radius: 50%;
+      background: var(--yellow);
+    }
+
+    .map-grid {
+      position: absolute;
+      inset: 0;
+      opacity: 0.34;
+      background-image:
+        linear-gradient(var(--ink) 1px, transparent 1px),
+        linear-gradient(90deg, var(--ink) 1px, transparent 1px);
+      background-size: 56px 56px;
+      transform: rotate(8deg) scale(1.25);
+    }
+
+    .path {
+      position: absolute;
+      left: 13%;
+      top: 8%;
+      width: 63%;
+      height: 83%;
+      border: 20px solid var(--ink);
+      border-top-color: transparent;
+      border-left-color: transparent;
+      border-radius: 46% 30% 55% 25%;
+      transform: rotate(16deg);
+    }
+
+    .path::after {
+      content: "";
+      position: absolute;
+      inset: -13px;
+      border: 6px dashed var(--lime);
+      border-top-color: transparent;
+      border-left-color: transparent;
+      border-radius: inherit;
+    }
+
+    .pin {
+      position: absolute;
+      display: grid;
+      place-items: center;
+      width: 58px;
+      height: 58px;
+      border: var(--line);
+      border-radius: 50% 50% 50% 8px;
+      background: var(--white);
+      box-shadow: 4px 4px 0 var(--ink);
+      font-size: 1.35rem;
+      transform: rotate(-45deg);
+    }
+
+    .pin span { transform: rotate(45deg); }
+    .pin-one { left: 18%; bottom: 14%; }
+    .pin-two { right: 18%; top: 30%; background: var(--pink); }
+
+    .time-sticker {
+      position: absolute;
+      left: 8%;
+      top: 10%;
+      padding: 13px 16px;
+      border: var(--line);
+      border-radius: 14px;
+      background: var(--lime);
+      box-shadow: 4px 4px 0 var(--ink);
+      font-size: 1.05rem;
+      font-weight: 900;
+      transform: rotate(-7deg);
+    }
+
+    .route-caption {
+      position: absolute;
+      right: 20px;
+      bottom: 19px;
+      width: 60%;
+      margin: 0;
+      padding: 13px 15px;
+      border: var(--line);
+      background: var(--white);
+      font-weight: 900;
+      line-height: 1.35;
+      transform: rotate(2deg);
+    }
+
+    /* ===== 핵심 장점 3개 ===== */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin: 54px 0;
+    }
+
+    .feature {
+      min-height: 180px;
+      padding: 22px;
+      border: var(--line);
+      border-radius: 22px;
+      box-shadow: 5px 5px 0 var(--ink);
+    }
+
+    .feature:nth-child(1) { background: var(--lime); }
+    .feature:nth-child(2) { background: var(--pink); }
+    .feature:nth-child(3) { background: var(--yellow); }
+
+    .feature-number {
+      display: block;
+      margin-bottom: 22px;
+      font-size: 0.78rem;
+      font-weight: 900;
+      letter-spacing: 0.1em;
+    }
+
+    .feature h2 { margin: 0 0 8px; font-size: 1.35rem; }
+    .feature p { margin: 0; line-height: 1.55; word-break: keep-all; }
+
+    /* ===== 버튼을 누르면 나타나는 간단한 체험 영역 ===== */
+    .demo {
+      margin-top: 70px;
+      padding: clamp(22px, 5vw, 52px);
+      border: var(--line);
+      border-radius: 28px;
+      background: var(--green);
+      color: var(--white);
+    }
+
+    .demo-grid {
+      display: grid;
+      grid-template-columns: 0.85fr 1.15fr;
+      gap: 28px;
+      align-items: end;
+    }
+
+    .demo h2 {
+      margin: 0 0 12px;
+      font-size: clamp(2rem, 5vw, 4rem);
+      line-height: 0.95;
+      letter-spacing: -0.06em;
+    }
+
+    .demo p { line-height: 1.55; }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding: 18px;
+      border: 2px solid var(--white);
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.09);
+    }
+
+    label { display: grid; gap: 7px; font-size: 0.8rem; font-weight: 900; }
+
+    select {
+      width: 100%;
+      min-height: 48px;
+      padding: 0 12px;
+      border: 2px solid var(--ink);
+      border-radius: 12px;
+      background: var(--white);
+      color: var(--ink);
+    }
+
+    .demo-button {
+      grid-column: 1 / -1;
+      min-height: 50px;
+      border: 2px solid var(--ink);
+      border-radius: 12px;
+      background: var(--lime);
+      color: var(--ink);
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .result {
+      display: none;
+      grid-column: 1 / -1;
+      margin: 5px 0 0;
+      padding: 15px;
+      border-radius: 12px;
+      background: var(--white);
+      color: var(--ink);
+      line-height: 1.5;
+    }
+
+    .result.show { display: block; }
+
+    /* ===== 강사 피드백 교체 영역 ===== */
+    .feedback {
+      margin-top: 24px;
+      padding: 16px 18px;
+      border: 2px dashed var(--ink);
+      border-radius: 16px;
+      background: var(--white);
+      color: var(--ink);
+      font-size: 0.88rem;
+      line-height: 1.55;
+    }
+
+    .feedback strong { background: var(--lime); }
+
+    footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding-top: 48px;
+      font-size: 0.78rem;
+      font-weight: 800;
+    }
+
+    /* ===== 모바일 화면 대응 ===== */
+    @media (max-width: 760px) {
+      .page { width: min(100% - 24px, 560px); padding-top: 14px; }
+      .nav-note { display: none; }
+      .hero { grid-template-columns: 1fr; min-height: auto; }
+      h1 { font-size: clamp(3.5rem, 18vw, 5.8rem); }
+      .route-art { min-height: 420px; }
+      .features { grid-template-columns: 1fr; }
+      .feature { min-height: 150px; }
+      .demo-grid { grid-template-columns: 1fr; }
+      footer { flex-direction: column; }
+    }
+
+    @media (max-width: 430px) {
+      .cta-row { align-items: flex-start; flex-direction: column; }
+      .cta { width: 100%; }
+      .controls { grid-template-columns: 1fr; }
+      .demo-button, .result { grid-column: auto; }
+      .route-caption { width: 72%; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .cta { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <nav class="nav" aria-label="주요 메뉴">
+      <a class="logo" href="#top" aria-label="DETOUR 홈">detour<span class="logo-dot">.</span></a>
+      <p class="nav-note">Shortest isn't always best.</p>
+    </nav>
+
+    <section class="hero" id="top">
+      <div>
+        <p class="eyebrow">Your spare time, your little route</p>
+        <h1>30분 남았어?<br><span class="highlight">그냥 보내지 마.</span></h1>
+        <p class="intro">
+          목적지에 바로 가기엔 아쉽고, 뭘 하기엔 애매한 시간.<br>
+          DETOUR가 남은 시간·예산·기분에 맞는 작은 외출을 골라드려요.
+        </p>
+        <div class="cta-row">
+          <a class="cta" href="#try">내 Detour 찾기 →</a>
+          <span class="micro-copy">로그인 없이 · 10초면 충분해요</span>
+        </div>
+      </div>
+
+      <div class="route-art" aria-label="도시 속 작은 우회 경로를 표현한 일러스트" role="img">
+        <div class="map-grid"></div>
+        <div class="sun"></div>
+        <div class="path"></div>
+        <div class="pin pin-one"><span>●</span></div>
+        <div class="pin pin-two"><span>★</span></div>
+        <div class="time-sticker">+ 30 MIN</div>
+        <p class="route-caption">늘 가던 길 말고,<br>오늘은 작은 우회 어때?</p>
+      </div>
+    </section>
+
+    <section class="features" aria-label="DETOUR 핵심 장점">
+      <article class="feature">
+        <span class="feature-number">01 · TIME FIT</span>
+        <h2>시간 안에 딱</h2>
+        <p>30·60·90분 중 남은 시간을 고르면, 늦지 않게 다녀올 수 있는 선택지만 보여줘요.</p>
+      </article>
+      <article class="feature">
+        <span class="feature-number">02 · MOOD FIT</span>
+        <h2>지금 기분대로</h2>
+        <p>산책, 카페, 구경 중 지금 하고 싶은 활동을 골라 작은 Detour를 만들어요.</p>
+      </article>
+      <article class="feature">
+        <span class="feature-number">03 · CLEAR REASON</span>
+        <h2>이유까지 분명하게</h2>
+        <p>예상 시간·비용과 추천 이유를 함께 보여줘서 직접 납득하고 선택할 수 있어요.</p>
+      </article>
+    </section>
+
+    <section class="demo" id="try">
+      <div class="demo-grid">
+        <div>
+          <p class="eyebrow">Mini preview</p>
+          <h2>오늘의 빈칸을<br>채워볼까요?</h2>
+          <p>첫 화면에서는 두 가지만 골라도 서비스가 어떤 일을 하는지 바로 경험할 수 있어요.</p>
+        </div>
+
+        <div class="controls">
+          <label>
+            남은 시간
+            <select id="timeSelect">
+              <option value="30">30분</option>
+              <option value="60">60분</option>
+              <option value="90">90분</option>
+            </select>
+          </label>
+          <label>
+            지금 기분
+            <select id="moodSelect">
+              <option value="산책">산책하고 싶어요</option>
+              <option value="카페">카페에 가고 싶어요</option>
+              <option value="구경">가볍게 구경하고 싶어요</option>
+            </select>
+          </label>
+          <button class="demo-button" id="recommendButton" type="button">작은 Detour 받아보기</button>
+          <p class="result" id="result" role="status" aria-live="polite"></p>
+        </div>
+      </div>
+
+      <!--
+        강사 피드백 교체 영역입니다.
+        아래 문장의 "00"을 실제 피드백으로 바꾸세요.
+        현재 논의된 Grok API/인스타그램 크롤링은 외부 연동이므로 MVP 이후 확장으로 표시했습니다.
+      -->
+      <div class="feedback">
+        <strong>강사 피드백 00 반영:</strong>
+        첫 화면에서 사용자가 추천의 핵심인 시간과 활동을 바로 선택하도록 구성했습니다.
+        Grok API·인스타그램 크롤링 아이디어는 이번 단일 HTML MVP에서는 제외하고,
+        추후 실제 인기 장소와 트렌드 데이터를 보강하는 확장 기능으로 남깁니다.
+      </div>
+    </section>
+
+    <footer>
+      <span>DETOUR © 2026</span>
+      <span>가장 빠른 길이 아니라, 나에게 맞는 길.</span>
+    </footer>
+  </main>
+
+  <script>
+    // ===== 간단한 추천 체험 데이터 =====
+    // 실제 API 대신 아래 문장을 수정해 포트폴리오용 예시를 만들 수 있습니다.
+    const recommendations = {
+      "30-산책": "동네 공원 한 바퀴 어때요? 이동 8분 + 산책 15분, 예상 비용 0원이에요.",
+      "30-카페": "가까운 테이크아웃 카페를 추천해요. 이동 10분 + 커피 한 잔, 예상 비용 6,000원이에요.",
+      "30-구경": "근처 독립서점의 신간 코너를 둘러보세요. 총 27분이면 충분해요.",
+      "60-산책": "천천히 걷기 좋은 녹지 코스를 추천해요. 이동 포함 약 55분이에요.",
+      "60-카페": "분위기 좋은 카페에서 35분 쉬어가세요. 총 58분, 예상 비용 9,000원이에요.",
+      "60-구경": "소품숍과 서점을 잇는 작은 구경 코스예요. 총 52분, 예상 비용 5,000원이에요.",
+      "90-산책": "공원과 수변 산책로를 잇는 여유 코스예요. 총 82분이면 다녀올 수 있어요.",
+      "90-카페": "산책 25분 뒤 카페에서 쉬는 코스를 추천해요. 총 86분, 예상 비용 12,000원이에요.",
+      "90-구경": "전시 공간과 소품숍을 잇는 동네 탐색 코스예요. 총 88분, 예상 비용 15,000원이에요."
+    };
+
+    const timeSelect = document.getElementById("timeSelect");
+    const moodSelect = document.getElementById("moodSelect");
+    const recommendButton = document.getElementById("recommendButton");
+    const result = document.getElementById("result");
+
+    // 버튼 클릭 시 선택한 시간과 기분에 맞는 예시 결과를 보여줍니다.
+    recommendButton.addEventListener("click", () => {
+      const key = `${timeSelect.value}-${moodSelect.value}`;
+      result.textContent = `추천 완료! ${recommendations[key]}`;
+      result.classList.add("show");
+    });
+  </script>
+</body>
+</html>
