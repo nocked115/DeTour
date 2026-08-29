@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ko">
+<html lang="ko" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -22,10 +22,14 @@
 
       /* 한국어는 음절 단위로 잘리면 "우회로 / 로." 처럼 읽기 나빠집니다.
          keep-all은 단어 단위로만 줄을 바꿉니다. */
-      body { background: #f6f2e9; word-break: keep-all; }
+      body { background: #f6f2e9; word-break: keep-all; color: #1a1c1a; }
+      /* 제목과 본문 색을 직접 지정한다.
+         지정하지 않으면 Pico.css가 정하는데, 사용자가 다크 모드면
+         밝은 글씨를 골라서 크림색 배경 위에 흰 글씨가 된다. */
+      h1, h2, h3 { color: #1a1c1a; }
       main { max-width: 920px; padding-top: 2.5rem; }
       .eyebrow { color: #176b47; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
-      .intro { max-width: 650px; font-size: 1.1rem; }
+      .intro { max-width: 650px; font-size: 1.1rem; color: #3a403b; }
       .helper { color: #59605b; font-size: 0.9rem; }
       .result[hidden], .message[hidden], .loading[hidden] { display: none; }
       .result-grid { display: grid; gap: 1rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
