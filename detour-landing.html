@@ -31,7 +31,7 @@
       font-family: Arial, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
     }
 
-    button, select { font: inherit; }
+    button, input, select { font: inherit; }
 
     .page {
       width: min(1180px, calc(100% - 36px));
@@ -334,6 +334,7 @@
 
     label { display: grid; gap: 7px; font-size: 0.8rem; font-weight: 900; }
 
+    input,
     select {
       width: 100%;
       min-height: 48px;
@@ -343,6 +344,37 @@
       background: var(--white);
       color: var(--ink);
     }
+
+    .field-full,
+    .location-status { grid-column: 1 / -1; }
+
+    .location-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+    }
+
+    .location-button {
+      min-height: 48px;
+      padding: 0 12px;
+      border: 2px solid var(--ink);
+      border-radius: 12px;
+      background: var(--white);
+      color: var(--ink);
+      font-size: 0.8rem;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .location-status {
+      display: none;
+      margin: -3px 0 0;
+      color: var(--white);
+      font-size: 0.75rem;
+      line-height: 1.4;
+    }
+
+    .location-status.show { display: block; }
 
     .demo-button {
       grid-column: 1 / -1;
@@ -402,19 +434,12 @@
       line-height: 1.5;
     }
 
-    /* ===== 강사 피드백 교체 영역 ===== */
-    .feedback {
-      margin-top: 24px;
-      padding: 16px 18px;
-      border: 2px dashed var(--ink);
-      border-radius: 16px;
-      background: var(--white);
-      color: var(--ink);
-      font-size: 0.88rem;
-      line-height: 1.55;
+    .recommendation-route {
+      margin-top: 8px !important;
+      color: #546254;
+      font-size: 0.75rem;
+      line-height: 1.45;
     }
-
-    .feedback strong { background: var(--lime); }
 
     footer {
       display: flex;
@@ -441,7 +466,8 @@
     @media (max-width: 430px) {
       .cta-row { align-items: flex-start; flex-direction: column; }
       .cta { width: 100%; }
-      .controls { grid-template-columns: 1fr; }
+      .controls,
+      .location-row { grid-template-columns: 1fr; }
       .demo-button, .result { grid-column: auto; }
       .route-caption { width: 72%; }
     }
@@ -507,10 +533,22 @@
         <div>
           <p class="eyebrow">Mini preview</p>
           <h2>오늘의 빈칸을<br>채워볼까요?</h2>
-          <p>첫 화면에서는 두 가지만 골라도 서비스가 어떤 일을 하는지 바로 경험할 수 있어요.</p>
+          <p>지금 어디에 있고, 어디로 가는지와 날씨까지 고려해 지금 가능한 작은 우회로를 찾아드려요.</p>
         </div>
 
         <div class="controls">
+          <label class="field-full">
+            현재 위치
+            <div class="location-row">
+              <input id="currentLocation" type="text" value="서울숲역" autocomplete="street-address" placeholder="예: 서울숲역">
+              <button class="location-button" id="locationButton" type="button">내 위치 가져오기</button>
+            </div>
+          </label>
+          <p class="location-status" id="locationStatus" role="status" aria-live="polite"></p>
+          <label class="field-full">
+            도착 위치
+            <input id="destinationInput" type="text" value="성수역" autocomplete="street-address" placeholder="예: 성수역">
+          </label>
           <label>
             남은 시간
             <select id="timeSelect">
@@ -520,7 +558,14 @@
             </select>
           </label>
           <label>
-            지금 기분
+            날씨
+            <select id="weatherSelect">
+              <option value="맑음">☀️ 맑음</option>
+              <option value="비">☔ 비 옴</option>
+            </select>
+          </label>
+          <label>
+            하고 싶은 것
             <select id="moodSelect">
               <option value="산책">산책하고 싶어요</option>
               <option value="카페">카페에 가고 싶어요</option>
@@ -530,18 +575,6 @@
           <button class="demo-button" id="recommendButton" type="button">작은 Detour 받아보기</button>
           <div class="result" id="result" role="status" aria-live="polite"></div>
         </div>
-      </div>
-
-      <!--
-        강사 피드백 교체 영역입니다.
-        아래 문장의 "00"을 실제 피드백으로 바꾸세요.
-        현재 논의된 Grok API/인스타그램 크롤링은 외부 연동이므로 MVP 이후 확장으로 표시했습니다.
-      -->
-      <div class="feedback">
-        <strong>강사 피드백 00 반영:</strong>
-        첫 화면에서 사용자가 추천의 핵심인 시간과 활동을 바로 선택하도록 구성했습니다.
-        Grok API·인스타그램 크롤링 아이디어는 이번 단일 HTML MVP에서는 제외하고,
-        추후 실제 인기 장소와 트렌드 데이터를 보강하는 확장 기능으로 남깁니다.
       </div>
     </section>
 
@@ -604,22 +637,93 @@
 
     const timeSelect = document.getElementById("timeSelect");
     const moodSelect = document.getElementById("moodSelect");
+    const weatherSelect = document.getElementById("weatherSelect");
+    const currentLocation = document.getElementById("currentLocation");
+    const destinationInput = document.getElementById("destinationInput");
+    const locationButton = document.getElementById("locationButton");
+    const locationStatus = document.getElementById("locationStatus");
     const recommendButton = document.getElementById("recommendButton");
     const result = document.getElementById("result");
+
+    const weatherTips = {
+      "맑음": "맑은 날이라 야외 활동을 우선으로 추천했어요.",
+      "비": "비가 오는 날이라 실내에 머무를 수 있는 장소를 우선으로 추천했어요."
+    };
+
+    const rainyRecommendations = {
+      "30": {
+        "산책": [["실내 식물원 짧은 산책", "91% Match · 28분 · 5,000원", "비를 피하면서도 천천히 걸을 수 있는 실내 공간이에요."], ["복합문화공간 한 바퀴", "84% Match · 25분 · 0원", "실내에서 짧게 둘러보며 기분을 전환하기 좋아요."], ["서점 산책", "78% Match · 29분 · 0원", "비 오는 날에도 조용히 걸으며 책을 구경할 수 있어요."]],
+        "카페": [["창가 카페", "93% Match · 27분 · 6,000원", "비를 보며 잠깐 쉬기 좋은 가까운 실내 선택지예요."], ["테이크아웃 카페", "85% Match · 24분 · 5,000원", "이동 시간을 줄여 비를 오래 맞지 않아요."], ["베이커리 카페", "77% Match · 30분 · 7,000원", "따뜻한 음료와 함께 잠깐 머무르기 좋아요."]],
+        "구경": [["독립서점", "91% Match · 27분 · 0원", "실내에서 신간과 문구를 구경할 수 있어요."], ["소품숍", "83% Match · 24분 · 3,000원", "짧은 시간에 가볍게 둘러보기 좋은 실내 장소예요."], ["작은 전시", "76% Match · 29분 · 5,000원", "비를 피해 문화 공간에서 시간을 보낼 수 있어요."]]
+      },
+      "60": {
+        "산책": [["실내 식물원", "93% Match · 55분 · 8,000원", "비가 와도 식물 사이를 걸으며 여유를 낼 수 있어요."], ["대형 서점", "86% Match · 52분 · 0원", "실내를 천천히 걸으며 원하는 분야를 탐색해 보세요."], ["복합문화공간", "78% Match · 50분 · 0원", "전시와 상점을 함께 둘러볼 수 있어요."]],
+        "카페": [["로스터리 카페", "94% Match · 58분 · 9,000원", "비 오는 날, 이동이 짧고 오래 머물기 좋은 카페예요."], ["북카페", "86% Match · 54분 · 8,000원", "커피와 독서를 함께 하며 비를 피할 수 있어요."], ["디저트 카페", "77% Match · 51분 · 10,000원", "잠깐 기분을 바꾸고 싶을 때 어울려요."]],
+        "구경": [["실내 전시 공간", "92% Match · 54분 · 8,000원", "날씨 영향 없이 전시를 여유 있게 볼 수 있어요."], ["편집숍", "84% Match · 49분 · 5,000원", "작은 브랜드와 물건을 구경하기 좋아요."], ["레코드숍", "76% Match · 52분 · 0원", "좋아하는 음악을 발견하는 실내 코스예요."]]
+      },
+      "90": {
+        "산책": [["대형 서점과 실내 정원", "94% Match · 82분 · 8,000원", "비를 피하면서도 걷는 느낌을 충분히 즐길 수 있어요."], ["복합문화공간 탐색", "86% Match · 78분 · 5,000원", "전시·서점·상점을 한곳에서 둘러볼 수 있어요."], ["미술관", "79% Match · 85분 · 12,000원", "긴 여유 시간이 있다면 전시 감상도 가능해요."]],
+        "카페": [["북카페 한 시간", "95% Match · 86분 · 10,000원", "비가 오는 날, 가장 편하게 시간을 보낼 수 있는 코스예요."], ["브런치 카페", "87% Match · 84분 · 15,000원", "가벼운 식사와 휴식을 함께 할 수 있어요."], ["카페와 서점", "80% Match · 80분 · 10,000원", "두 실내 공간을 이어 비를 피하며 즐길 수 있어요."]],
+        "구경": [["미술관과 뮤지엄숍", "93% Match · 88분 · 15,000원", "비와 관계없이 문화 공간을 충분히 즐길 수 있어요."], ["서점과 레코드숍", "85% Match · 80분 · 5,000원", "관심 가는 것들을 천천히 둘러보기 좋아요."], ["실내 마켓", "77% Match · 83분 · 8,000원", "로컬 브랜드를 구경하며 시간을 보낼 수 있어요."]]
+      }
+    };
+
+    const escapeHtml = (text) => text.replace(/[&<>'"]/g, (character) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      "'": "&#39;",
+      "\"": "&quot;"
+    })[character]);
+
+    locationButton.addEventListener("click", () => {
+      if (!navigator.geolocation) {
+        locationStatus.textContent = "이 브라우저에서는 현재 위치 기능을 지원하지 않아요. 직접 입력해 주세요.";
+        locationStatus.classList.add("show");
+        return;
+      }
+
+      locationStatus.textContent = "현재 위치를 확인하고 있어요…";
+      locationStatus.classList.add("show");
+
+      navigator.geolocation.getCurrentPosition(
+        ({ coords }) => {
+          currentLocation.value = `현재 위치 (${coords.latitude.toFixed(4)}, ${coords.longitude.toFixed(4)})`;
+          locationStatus.textContent = "현재 좌표를 입력했어요. 실제 장소명과 이동 시간은 지도 API 연결 후 계산할 수 있어요.";
+        },
+        () => {
+          locationStatus.textContent = "현재 위치를 가져오지 못했어요. 위치 권한을 허용하거나 직접 입력해 주세요.";
+        }
+      );
+    });
 
     // 버튼 클릭 시 선택한 시간과 기분에 맞는 예시 결과를 보여줍니다.
     recommendButton.addEventListener("click", () => {
       const key = `${timeSelect.value}-${moodSelect.value}`;
-      const cards = recommendations[key];
+      const location = currentLocation.value.trim();
+      const destination = destinationInput.value.trim();
+
+      if (!location || !destination) {
+        result.innerHTML = "<p class=\"result-title\">현재 위치와 도착 위치를 모두 입력해 주세요.</p>";
+        result.classList.add("show");
+        return;
+      }
+
+      const cards = weatherSelect.value === "비"
+        ? rainyRecommendations[timeSelect.value][moodSelect.value]
+        : recommendations[key];
+      const travelMinutes = [8, 10, 12];
 
       result.innerHTML = `
-        <p class="result-title">${timeSelect.value}분 동안 ${moodSelect.value}하고 싶다면</p>
+        <p class="result-title">${escapeHtml(location)}에서 ${escapeHtml(destination)}로 가는 길, ${timeSelect.value}분 동안 ${moodSelect.value}하고 싶다면</p>
+        <p class="recommendation-reason">${weatherTips[weatherSelect.value]} 현재 이동 시간은 데모용 예시이며, 지도 API를 연결하면 실제 경로 기준으로 바뀝니다.</p>
         <div class="recommendation-list">
           ${cards.map(([name, meta, reason], index) => `
             <article class="recommendation-card">
               <h3>TOP ${index + 1}. ${name}</h3>
               <p class="recommendation-meta">${meta}</p>
               <p class="recommendation-reason">${reason}</p>
+              <p class="recommendation-route">${escapeHtml(location)}에서 예시 도보 ${travelMinutes[index]}분 · ${escapeHtml(destination)} 방향</p>
             </article>
           `).join("")}
         </div>
