@@ -60,6 +60,10 @@ DETOUR는 “갈 곳이 없다”가 아니라 “선택하기 어렵다”는 �
 - [`docs/WEEK2_API_CONTRACT.md`](./docs/WEEK2_API_CONTRACT.md) — Week 2에 붙일 FastAPI 요청·응답 형식
 - `docs/landing-preview.png` — README용 화면 미리보기
 
+## 디자인 파일
+
+- [DETOUR 화면 상태 지도 (Figma)](https://www.figma.com/design/Ca1n7y6VmEO9xDv5EweJTQ) — 화면 9개의 상태와 각각이 언제 뜨는지, 어느 주차에 구현하는지 정리
+
 ## 실행하기
 
 현재는 별도 빌드 도구 없이 정적 HTML로 시작합니다.
