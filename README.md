@@ -53,6 +53,7 @@ DETOUR는 “갈 곳이 없다”가 아니라 “선택하기 어렵다”는 �
 - [`PLAN.md`](./PLAN.md) — 5주 주간·일간 실행 계획
 - [`study/`](./study) — 주차별 학습 기록
 - [`journal/`](./journal) — 날짜별 고민·결정·회고 기록
+- [`docs/PROJECT_CONTEXT.md`](./docs/PROJECT_CONTEXT.md) — 새 세션·협업자를 위한 프로젝트 빠른 시작 안내
 - `docs/landing-preview.png` — README용 화면 미리보기
 
 ## 실행하기
