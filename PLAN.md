@@ -43,13 +43,12 @@ Week 3에서는 성수동 고정 데이터로 추천 로직을 맞춘다. 처음
 
 혼잡도는 확장 기능이므로 없어도 서비스가 성립한다. 핵심 MVP는 전국에서 동작한다.
 
-## Week 1 — Frontend와 첫 화면
+## 진행 상황 (2026-08-29 기준)
 
-목표: 빌드 도구 없이 `index.html` 한 파일에서 사용자가 출발지·도착지·남은 시간·예산·활동을 입력하면 예시 추천 결과 카드가 뜬다.
+Week 1 완료. 회고는 [`docs/reports/2026-08-29-week02-first-deploy.md`](docs/reports/2026-08-29-week02-first-deploy.md)에 남겼다.
+Week 2도 대부분 끝났고, Week 3의 `/recommend`까지 앞당겨 진행했다.
 
-- [ ] Session 3 남은 것: Week 1 공부·구현 점검, 회고, GitHub 기록
-
-완료 기준: 입력 후 버튼을 누르면 조건과 추천 이유가 일치하는 예시 카드 2개가 보이며, 모바일에서도 입력·결과를 읽기 쉽다.
+남은 것은 아래 체크박스가 비어 있는 항목이다.
 
 ## Week 2 — 배포와 서버의 시작
 
@@ -61,25 +60,25 @@ Week 3에서는 성수동 고정 데이터로 추천 로직을 맞춘다. 처음
 
 ### Session 1 — 배포 먼저
 
-- [ ] GitHub Pages로 `index.html` 배포, 실제 URL 확보
-- [ ] 휴대폰으로 그 URL을 열어 입력·결과·모바일 레이아웃 확인
-- [ ] README에 배포 URL 추가
-- [ ] 공부: HTTP, Request, Response, JSON, HTTPS가 무엇인지
+- [x] GitHub Pages로 `index.html` 배포, 실제 URL 확보
+- [ ] 휴대폰으로 그 URL을 열어 입력·결과·모바일 레이아웃 확인 — *실기기 확인 필요*
+- [x] README에 배포 URL 추가
+- [ ] 공부: HTTP, Request, Response, JSON, HTTPS가 무엇인지 — *`study/`에 기록 남기기*
 
 ### Session 2 — 열쇠와 데이터 준비
 
-- [ ] 카카오 개발자 등록, 앱 생성, REST API key 발급
+- [x] 카카오 개발자 등록, 앱 생성, REST API key 발급
 - [ ] 기상청 API허브 인증키 발급 (Week 5 확장 기능용, 미리 받아둔다)
-- [ ] 장소 유형별 체류 시간·비용 규칙표 확정 (아래 "장소 데이터 규칙" 참고)
+- [x] 장소 유형별 체류 시간·비용 규칙표 확정 (아래 "장소 데이터 규칙" 참고)
 - [ ] 성수동 후보 장소를 카카오 카테고리 검색으로 수집하고, 추천 후보 20개를 사람이 선별
 
 ### Session 3 — FastAPI 첫 걸음
 
-- [ ] Python 가상환경과 FastAPI 설치, `/health` Endpoint 구현
-- [ ] Pydantic Request/Response Model 작성
+- [x] Python 가상환경과 FastAPI 설치, `/health` Endpoint 구현
+- [x] Pydantic Request/Response Model 작성
 - [ ] `POST /geocode` 구현 — 주소·장소명을 카카오맵 API로 좌표 변환
-- [ ] Swagger `/docs`에서 직접 호출해보기
-- [ ] `.env`에 key 보관, `.gitignore` 확인 — key는 절대 커밋하지 않는다
+- [ ] Swagger `/docs`에서 직접 호출해보기 — *`Try it out`으로 값을 바꿔가며 눌러볼 것*
+- [x] `.env`에 key 보관, `.gitignore` 확인 — key는 절대 커밋하지 않는다
 
 완료 기준: 배포된 URL이 존재하고, 로컬 FastAPI가 주소를 좌표 JSON으로 돌려주며, API key는 브라우저에 노출되지 않는다.
 
@@ -96,9 +95,11 @@ Week 3에서는 성수동 고정 데이터로 추천 로직을 맞춘다. 처음
 
 ### Session 2 — /recommend와 연결
 
-- [ ] `POST /recommend` 구현 — `docs/WEEK2_API_CONTRACT.md`의 형식 그대로
-- [ ] `index.html`의 `places` 상수를 지우고 `fetch()`로 교체
-- [ ] CORS 설정과 디버깅
+- [x] `POST /recommend` 구현 — `docs/WEEK2_API_CONTRACT.md`의 형식 그대로
+- [x] `index.html`을 `fetch()`로 서버에 연결 — **`places` 상수는 지우지 않고 남겼다.**
+      서버가 꺼지면 내장 20개로 계산해야 배포된 사이트가 깨지지 않는다.
+      서버를 배포한 뒤에 지울지 다시 판단한다.
+- [x] CORS 설정과 디버깅
 
 ### Session 3 — 서버 배포
 
