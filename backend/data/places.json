@@ -1,0 +1,286 @@
+{
+  "area": "성수·서울숲",
+  "source": "직접 작성한 예시 데이터 (Week 1)",
+  "places": [
+    {
+      "id": "seoulforest-walk",
+      "name": "서울숲 산책로",
+      "area": "성수·서울숲",
+      "activity": "산책",
+      "reason": "이동과 산책을 합쳐도 짧은 시간 안에 기분 전환하기 좋아요.",
+      "stayMinutes": 22,
+      "travelMinutes": 6,
+      "cost": 0,
+      "tags": [
+        "야외",
+        "무료"
+      ]
+    },
+    {
+      "id": "yeonmujang-walk",
+      "name": "성수 연무장길 산책",
+      "area": "성수·서울숲",
+      "activity": "산책",
+      "reason": "목적지 방향의 골목을 천천히 걸으며 새로운 가게를 발견할 수 있어요.",
+      "stayMinutes": 34,
+      "travelMinutes": 8,
+      "cost": 0,
+      "tags": [
+        "야외",
+        "구경 겸용"
+      ]
+    },
+    {
+      "id": "hangang-bench",
+      "name": "한강 벤치 휴식",
+      "area": "성수·서울숲",
+      "activity": "산책",
+      "reason": "걷기와 잠깐 쉬는 시간을 함께 넣어도 여유가 있어요.",
+      "stayMinutes": 45,
+      "travelMinutes": 10,
+      "cost": 0,
+      "tags": [
+        "야외",
+        "조용함"
+      ]
+    },
+    {
+      "id": "eungbongsan-walk",
+      "name": "응봉산 짧은 산책",
+      "area": "성수·서울숲",
+      "activity": "산책",
+      "reason": "시간이 충분할 때 서울 풍경을 보고 돌아오기 좋은 코스예요.",
+      "stayMinutes": 65,
+      "travelMinutes": 13,
+      "cost": 0,
+      "tags": [
+        "야외",
+        "전망"
+      ]
+    },
+    {
+      "id": "neighborhood-park",
+      "name": "동네 공원 한 바퀴",
+      "area": "성수·서울숲",
+      "activity": "산책",
+      "reason": "30분이 안 되는 짧은 시간에도 가볍게 몸을 움직일 수 있어요.",
+      "stayMinutes": 16,
+      "travelMinutes": 4,
+      "cost": 0,
+      "tags": [
+        "야외",
+        "가까움"
+      ]
+    },
+    {
+      "id": "takeout-coffee",
+      "name": "테이크아웃 커피",
+      "area": "성수·서울숲",
+      "activity": "카페",
+      "reason": "이동 시간이 짧아 커피 한 잔을 챙기고도 늦지 않아요.",
+      "stayMinutes": 20,
+      "travelMinutes": 5,
+      "cost": 4500,
+      "tags": [
+        "가까움",
+        "빠름"
+      ]
+    },
+    {
+      "id": "seongsu-roastery",
+      "name": "성수 로스터리 카페",
+      "area": "성수·서울숲",
+      "activity": "카페",
+      "reason": "잠깐 앉아 쉬기 좋고, 목적지와도 멀지 않은 선택이에요.",
+      "stayMinutes": 41,
+      "travelMinutes": 7,
+      "cost": 7000,
+      "tags": [
+        "실내",
+        "앉아서 쉬기"
+      ]
+    },
+    {
+      "id": "book-cafe",
+      "name": "북카페 한 시간",
+      "area": "성수·서울숲",
+      "activity": "카페",
+      "reason": "커피와 책을 함께 즐기며 남은 시간을 차분히 보낼 수 있어요.",
+      "stayMinutes": 53,
+      "travelMinutes": 9,
+      "cost": 8500,
+      "tags": [
+        "실내",
+        "조용함"
+      ]
+    },
+    {
+      "id": "dessert-cafe",
+      "name": "디저트 카페",
+      "area": "성수·서울숲",
+      "activity": "카페",
+      "reason": "조금 더 긴 여유가 있을 때 달콤한 휴식을 더하기 좋아요.",
+      "stayMinutes": 63,
+      "travelMinutes": 11,
+      "cost": 10000,
+      "tags": [
+        "실내",
+        "여유"
+      ]
+    },
+    {
+      "id": "bakery-cafe",
+      "name": "베이커리 카페",
+      "area": "성수·서울숲",
+      "activity": "카페",
+      "reason": "간단한 빵과 음료를 고르기에 알맞은 짧은 코스예요.",
+      "stayMinutes": 30,
+      "travelMinutes": 6,
+      "cost": 6000,
+      "tags": [
+        "실내",
+        "간단한 식사"
+      ]
+    },
+    {
+      "id": "indie-bookstore",
+      "name": "독립서점 신간 코너",
+      "area": "성수·서울숲",
+      "activity": "구경",
+      "reason": "짧은 시간에도 새로운 책과 문구를 가볍게 둘러볼 수 있어요.",
+      "stayMinutes": 24,
+      "travelMinutes": 6,
+      "cost": 0,
+      "tags": [
+        "실내",
+        "무료"
+      ]
+    },
+    {
+      "id": "seongsu-giftshop",
+      "name": "성수 소품숍",
+      "area": "성수·서울숲",
+      "activity": "구경",
+      "reason": "작은 가게를 둘러보며 부담 없이 기분을 바꾸기 좋아요.",
+      "stayMinutes": 33,
+      "travelMinutes": 7,
+      "cost": 3000,
+      "tags": [
+        "실내",
+        "저예산"
+      ]
+    },
+    {
+      "id": "forest-fleamarket",
+      "name": "서울숲 플리마켓",
+      "area": "성수·서울숲",
+      "activity": "구경",
+      "reason": "여러 개의 작은 가게를 한 번에 구경할 수 있어요.",
+      "stayMinutes": 49,
+      "travelMinutes": 9,
+      "cost": 5000,
+      "tags": [
+        "야외",
+        "활기참"
+      ]
+    },
+    {
+      "id": "record-shop",
+      "name": "레코드숍 탐색",
+      "area": "성수·서울숲",
+      "activity": "구경",
+      "reason": "좋아하는 음악을 찾으며 여유를 쓰기에 알맞아요.",
+      "stayMinutes": 62,
+      "travelMinutes": 10,
+      "cost": 5000,
+      "tags": [
+        "실내",
+        "취향"
+      ]
+    },
+    {
+      "id": "stationery-shop",
+      "name": "문구점 한 바퀴",
+      "area": "성수·서울숲",
+      "activity": "구경",
+      "reason": "가까운 곳에서 작지만 즐거운 구경을 할 수 있어요.",
+      "stayMinutes": 20,
+      "travelMinutes": 4,
+      "cost": 2000,
+      "tags": [
+        "가까움",
+        "저예산"
+      ]
+    },
+    {
+      "id": "photo-exhibition",
+      "name": "작은 사진 전시",
+      "area": "성수·서울숲",
+      "activity": "문화",
+      "reason": "짧은 관람으로도 새로운 분위기를 느낄 수 있어요.",
+      "stayMinutes": 29,
+      "travelMinutes": 6,
+      "cost": 3000,
+      "tags": [
+        "실내",
+        "짧은 관람"
+      ]
+    },
+    {
+      "id": "culture-complex",
+      "name": "복합문화공간",
+      "area": "성수·서울숲",
+      "activity": "문화",
+      "reason": "전시와 상점을 함께 둘러보기 좋은 실내 선택지예요.",
+      "stayMinutes": 42,
+      "travelMinutes": 8,
+      "cost": 0,
+      "tags": [
+        "실내",
+        "무료"
+      ]
+    },
+    {
+      "id": "indie-film-poster",
+      "name": "독립영화 포스터 전시",
+      "area": "성수·서울숲",
+      "activity": "문화",
+      "reason": "문화 공간을 가볍게 둘러보며 약속 전 시간을 채울 수 있어요.",
+      "stayMinutes": 56,
+      "travelMinutes": 9,
+      "cost": 5000,
+      "tags": [
+        "실내",
+        "조용함"
+      ]
+    },
+    {
+      "id": "small-gallery",
+      "name": "소규모 갤러리",
+      "area": "성수·서울숲",
+      "activity": "문화",
+      "reason": "긴 여유가 있을 때 한 전시를 천천히 감상하기 좋아요.",
+      "stayMinutes": 70,
+      "travelMinutes": 12,
+      "cost": 8000,
+      "tags": [
+        "실내",
+        "여유"
+      ]
+    },
+    {
+      "id": "library-exhibition",
+      "name": "도서관 전시 코너",
+      "area": "성수·서울숲",
+      "activity": "문화",
+      "reason": "비용 부담 없이 조용한 문화생활을 시작할 수 있어요.",
+      "stayMinutes": 38,
+      "travelMinutes": 7,
+      "cost": 0,
+      "tags": [
+        "실내",
+        "무료"
+      ]
+    }
+  ]
+}

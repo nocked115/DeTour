@@ -7,3 +7,8 @@ dist/
 build/
 .openai/
 
+
+# Python
+.venv/
+__pycache__/
+*.pyc

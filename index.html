@@ -236,6 +236,8 @@
       //   reason        Week 1은 고정 문장. Week 4에 점수 근거 기반 자동 생성으로 교체합니다.
       //
       // 총 소요 시간 = stayMinutes + travelMinutes
+       // 서버 주소. Week 3에 서버를 배포하면 이 줄만 바꾸면 된다.
+      const API_BASE = "http://127.0.0.1:8000";
       const places = [
         { id: "seoulforest-walk", name: "서울숲 산책로", area: "성수·서울숲", activity: "산책", stayMinutes: 22, travelMinutes: 6, cost: 0, tags: ["야외", "무료"], reason: "이동과 산책을 합쳐도 짧은 시간 안에 기분 전환하기 좋아요." },
         { id: "yeonmujang-walk", name: "성수 연무장길 산책", area: "성수·서울숲", activity: "산책", stayMinutes: 34, travelMinutes: 8, cost: 0, tags: ["야외", "구경 겸용"], reason: "목적지 방향의 골목을 천천히 걸으며 새로운 가게를 발견할 수 있어요." },
@@ -310,17 +312,38 @@
         }).join("");
       };
 
-      const findDetours = ({ origin, destination, time, budget, activity }) => {
-        const candidates = places
-          .filter((place) =>
-            place.activity === activity &&
-            totalMinutes(place) <= time &&
-            place.cost <= budget
-          )
-          // 남은 시간 안에 들어오는 후보 중, 시간을 가장 알차게 쓰는 순서로 봅니다.
-          // (짧은 순으로 두면 90분이 비어도 20분짜리 코스를 먼저 추천하게 됩니다.)
-          .sort((first, second) => totalMinutes(second) - totalMinutes(first))
-          .slice(0, 2);
+            // 서버에 물어본다. 서버가 없으면 null을 돌려준다.
+      const askServer = async (input) => {
+        try {
+          const response = await fetch(`${API_BASE}/recommend`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(input)
+          });
+          if (!response.ok) return null;
+          const data = await response.json();
+          return data.results;
+        } catch (error) {
+          // 서버가 꺼져 있거나 인터넷이 안 되면 여기로 온다
+          return null;
+        }
+      };
+
+      const findDetours = async ({ origin, destination, time, budget, activity }) => {
+        // 먼저 서버에 물어본다
+      const fromServer = await askServer({ origin, destination, time, budget, activity });
+
+        // 서버가 답하면 그걸 쓰고, 안 되면 내가 가진 20개로 계산한다
+      const candidates = fromServer !== null
+          ? fromServer
+          : places
+              .filter((place) =>
+                place.activity === activity &&
+                totalMinutes(place) <= time &&
+                place.cost <= budget
+              )
+              .sort((first, second) => totalMinutes(second) - totalMinutes(first))
+              .slice(0, 2);
 
         if (candidates.length === 0) {
           showMessage("empty", "지금 조건에 맞는 예시 코스가 없어요. 시간 또는 예산을 조금 늘려보세요.");
@@ -362,11 +385,11 @@
         submitButton.disabled = true;
         submitButton.setAttribute("aria-busy", "true");
 
-        window.setTimeout(() => {
+        window.setTimeout(async () => {
+          await findDetours({ origin, destination, time, budget, activity });
           loading.hidden = true;
           submitButton.disabled = false;
           submitButton.removeAttribute("aria-busy");
-          findDetours({ origin, destination, time, budget, activity });
         }, 250);
       });
     </script>
