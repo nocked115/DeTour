@@ -43,124 +43,56 @@ Week 3에서는 성수동 고정 데이터로 추천 로직을 맞춘다. 처음
 
 혼잡도는 확장 기능이므로 없어도 서비스가 성립한다. 핵심 MVP는 전국에서 동작한다.
 
-## 진행 상황 (2026-08-29 기준)
+## 진행 상황 (2026-10-06)
 
-Week 1 완료. 회고는 [`docs/reports/2026-08-29-week02-first-deploy.md`](docs/reports/2026-08-29-week02-first-deploy.md)에 남겼다.
-Week 2도 대부분 끝났고, Week 3의 `/recommend`까지 앞당겨 진행했다.
+구현은 대부분 끝났다. 남은 것은 **내가 직접 해야 하는 일**과 **배포**다.
 
-남은 것은 아래 체크박스가 비어 있는 항목이다.
+### 끝난 것
 
-## Week 2 — 배포와 서버의 시작
+- 화면: TOP 3 카드, 점수 근거 막대, 지도 자리, 현재 위치 버튼
+- 다섯 가지 상태: 입력 / 찾는 중 / 결과 / 결과 없음 / 입력 오류 / 서버 오류(다시 시도) / 위치 권한 거부
+- 서버: `/health` `/places` `/geocode` `/recommend`
+- 추천 엔진: Feature → Normalization → Weight → Score → Ranking → 이유 (`app/scoring.py`)
+- 거리 계산: haversine + 우회 추가 시간 (`app/geo.py`) — 카카오 없이 동작
+- 카카오 클라이언트: 403/429/타임아웃을 사람이 읽을 수 있는 안내로 변환 (`app/kakao.py`)
+- 실제 장소 수집 스크립트: `backend/scripts_collect.py` — 카카오만 켜지면 바로 실행
 
-목표: 진짜 URL을 확보하고, FastAPI가 주소를 좌표로 바꿔 돌려준다.
+### 남은 것
 
-**배포를 이번 주로 당긴 이유**: `index.html`은 정적 파일 한 개라 GitHub Pages에 올리는 데 5분이면 된다.
-지금 배포하면 남은 4주 내내 "현재 상태"를 링크로 볼 수 있고, HTTPS·CORS 문제를 마지막 주가 아니라 지금 만난다.
-그리고 브라우저 위치 기능(geolocation)은 `file://`에서 아예 작동하지 않아, 배포해야 테스트가 가능하다.
+#### S1. 카카오맵 서비스 켜기 ← 지금 유일한 막힘
 
-### Session 1 — 배포 먼저
+- [ ] `developers.kakao.com` → 내 애플리케이션 → 카카오맵 → 사용 설정 → 상태 **ON**
 
-- [x] GitHub Pages로 `index.html` 배포, 실제 URL 확보
-- [ ] 휴대폰으로 그 URL을 열어 입력·결과·모바일 레이아웃 확인 — *실기기 확인 필요*
-- [x] README에 배포 URL 추가
-- [ ] 공부: HTTP, Request, Response, JSON, HTTPS가 무엇인지 — *`study/`에 기록 남기기*
+현재 키는 인증은 되지만 `403 App(DeTOUR) disabled OPEN_MAP_AND_LOCAL service`가 돌아온다.
+이것만 켜지면 `/geocode`와 실제 거리 계산이 바로 살아난다.
 
-### Session 2 — 열쇠와 데이터 준비
+#### S2. 실제 장소로 교체
 
-- [x] 카카오 개발자 등록, 앱 생성, REST API key 발급
-- [ ] 기상청 API허브 인증키 발급 (Week 5 확장 기능용, 미리 받아둔다)
-- [x] 장소 유형별 체류 시간·비용 규칙표 확정 (아래 "장소 데이터 규칙" 참고)
-- [ ] 성수동 후보 장소를 카카오 카테고리 검색으로 수집하고, 추천 후보 20개를 사람이 선별
+- [ ] `cd backend && .venv/bin/python scripts_collect.py` 로 후보 확인
+- [ ] 결과에서 추천할 만한 곳만 직접 선별 (30~60분, 사람이 해야 하는 일)
+- [ ] `--write` 로 `data/places.json` 교체
+- [ ] 분류가 어색한 장소의 `placeType` 손보기
 
-### Session 3 — FastAPI 첫 걸음
+#### S3. 서버 배포
 
-- [x] Python 가상환경과 FastAPI 설치, `/health` Endpoint 구현
-- [x] Pydantic Request/Response Model 작성
-- [ ] `POST /geocode` 구현 — 주소·장소명을 카카오맵 API로 좌표 변환
-- [ ] Swagger `/docs`에서 직접 호출해보기 — *`Try it out`으로 값을 바꿔가며 눌러볼 것*
-- [x] `.env`에 key 보관, `.gitignore` 확인 — key는 절대 커밋하지 않는다
+- [ ] Render 등에 FastAPI 배포, `KAKAO_REST_API_KEY`를 환경변수로
+- [ ] `index.html`의 `API_BASE`에서 github.io 분기를 배포 주소로 교체
+- [ ] 배포된 화면 ↔ 배포된 서버 연결 확인
 
-완료 기준: 배포된 URL이 존재하고, 로컬 FastAPI가 주소를 좌표 JSON으로 돌려주며, API key는 브라우저에 노출되지 않는다.
+#### S4. 지도
 
-## Week 3 — 서버 연결과 장소 데이터
+- [ ] 카카오 **JavaScript 키** 발급 (REST 키와 다른 키)
+- [ ] 콘솔에서 JavaScript SDK 도메인에 `https://nocked115.github.io` 등록
+- [ ] `index.html`의 `KAKAO_JS_KEY`에 넣기 — 코드는 이미 준비돼 있다
 
-목표: 브라우저가 내 서버에 요청을 보내고, 서버가 성수동 장소 데이터로 추천을 돌려준다.
+#### S5. 확인과 마무리
 
-### Session 1 — 장소 데이터 파이프라인
-
-- [ ] 수집한 원본 데이터를 정제 (결측값·중복·잘못된 값 정리)
-- [ ] Feature 생성: `placeType` → 규칙표에서 `stayMinutes`, `cost` 도출
-- [ ] 활동 분류(`산책`/`카페`/`구경`/`문화`)와 `tags` 부여
-- [ ] 공부: Feature Engineering이 무엇인지 — 원본 데이터에서 추천에 쓸 값을 만들어내는 일
-
-### Session 2 — /recommend와 연결
-
-- [x] `POST /recommend` 구현 — `docs/WEEK2_API_CONTRACT.md`의 형식 그대로
-- [x] `index.html`을 `fetch()`로 서버에 연결 — **`places` 상수는 지우지 않고 남겼다.**
-      서버가 꺼지면 내장 20개로 계산해야 배포된 사이트가 깨지지 않는다.
-      서버를 배포한 뒤에 지울지 다시 판단한다.
-- [x] CORS 설정과 디버깅
-
-### Session 3 — 서버 배포
-
-- [ ] FastAPI 서버 배포 (Render 등), 환경변수로 API key 관리
-- [ ] 배포된 Frontend ↔ 배포된 Backend 연결 확인
-- [ ] Figma 화면 06(주소 못 찾음), 07(서버 오류) 구현
-- [ ] Dataset 출처·갱신 시각·지역 한계를 기록
-
-완료 기준: 배포된 웹에서 입력하면 배포된 서버를 거쳐 추천이 돌아온다. 주소 못 찾음과 서버 오류가 각각 다른 화면으로 처리된다.
-
-## Week 4 — 추천 점수와 전국 확장
-
-목표: 실제 경로 시간과 설명 가능한 점수로 TOP 3를 계산하고, 성수동 고정에서 벗어난다.
-
-### Session 1 — 실제 경로 시간
-
-- [ ] 카카오 경로 API로 현재 위치 → 후보 → 목적지 시간 조회
-- [ ] 우회에 드는 추가 시간·거리 계산 (`travelMinutes`를 진짜 값으로 교체)
-- [ ] 공부: Feature, Normalization, Weight, Score, Ranking
-
-### Session 2 — 점수 계산
-
-- [ ] 시간·예산·거리 적합도를 0~1로 정규화 ★ 이 함수는 직접 채운다
-- [ ] 사용자 활동 Weight와 최종 Score 계산
-- [ ] Ranking과 TOP 3 응답, 점수 근거 기반 추천 이유 자동 생성
-- [ ] 카드를 2개에서 3개로
-
-### Session 3 — 전국으로
-
-- [ ] 고정 20개 대신 출발지 좌표 반경의 카카오 카테고리 검색으로 후보 수집
-- [ ] 성수동 외 지역(예: 부산, 대전)에서 동작 확인
-- [ ] 조건을 바꿔가며 순위와 추천 이유가 합리적으로 바뀌는지 테스트
-
-완료 기준: 입력 조건을 바꾸면 실제 이동 시간·예산·활동에 따라 순위와 추천 이유가 바뀌고, 성수동이 아닌 지역에서도 결과가 나온다.
-
-## Week 5 — 지도, 확장 기능, 사용자 테스트
-
-목표: 지도를 붙이고 확장 기능 하나를 넣은 뒤, 실제 사용자에게 보여준다.
-
-### Session 1 — 지도
-
-- [ ] 카카오맵 JavaScript SDK로 후보 장소와 경로 표시 (Figma 화면 09)
-- [ ] 브라우저 현재 위치(geolocation) 연결, 권한 거부 화면 구현 (Figma 화면 08)
-- [ ] 모바일 레이아웃과 Touch Target 재점검
-
-### Session 2 — 확장 기능 하나
-
-아래 중 **하나만** 고른다. 핵심 MVP가 이미 동작하므로 `docs/MVP_DECISION_RULES.md`의 조건을 만족한다.
-
-- [ ] (선택 A) 날씨 — 기상청 단기예보로 강수·하늘 상태를 받아 실내/실외 가점
-- [ ] (선택 B) 혼잡도 — 서울시 실시간 도시데이터. 서울 한정이며 데이터 없는 장소는 "혼잡도 정보 없음" 표시
-- [ ] 선택하지 않은 쪽은 확장 아이디어로 남긴다
-
-### Session 3 — 사용자 테스트와 마무리
-
-- [ ] 3~5명 사용자 테스트 — 목적지 설정, 추천 이유 이해 여부 확인
-- [ ] 발견한 문제 1~2개 수정
-- [ ] API 호출량·오류 로그 점검
-- [ ] README·DEVLOG·포트폴리오 정리와 최종 회고
-
-완료 기준: 배포된 웹에서 입력 → 실제 경로 기반 TOP 3 → 지도 확인이 가능하고, 주요 오류 상태를 설명할 수 있다.
+- [ ] 휴대폰 실기기에서 입력·결과·지도 확인
+- [ ] Swagger `/docs`에서 각 Endpoint 직접 호출
+- [ ] 성수동 외 지역(부산 등)에서 동작 확인
+- [ ] 확장 기능 하나 (날씨 또는 혼잡도) — 핵심이 다 된 뒤에만
+- [ ] 사용자 테스트 3~5명, 문제 1~2개 수정
+- [ ] `study/`에 HTTP·Feature·Normalization 기록
 
 ## 장소 데이터 규칙
 

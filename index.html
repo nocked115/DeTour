@@ -108,6 +108,20 @@
       .tag { display: inline-block; margin: 8px 6px 0 0; padding: 3px 9px; border: 1.5px solid var(--ink); border-radius: 999px; background: var(--lime); font-size: 0.72rem; font-weight: 800; }
       .footnote { margin: 12px 0 0; font-size: 0.76rem; line-height: 1.5; }
 
+      .locate { margin-top: 6px; padding: 7px 10px; border: 2px solid var(--white); border-radius: 999px; background: transparent; color: var(--white); font-size: 0.72rem; font-weight: 800; }
+      .locate:disabled { opacity: 0.5; }
+      .map-wrap { margin-bottom: 12px; }
+      .map { height: 240px; border: 2px solid var(--ink); border-radius: 12px; background: #dde1d8; }
+      .map-note { margin: 6px 0 0; font-size: 0.72rem; font-weight: 700; }
+      .rank { display: inline-flex; width: 22px; height: 22px; align-items: center; justify-content: center; margin-right: 6px; border: 2px solid var(--ink); border-radius: 999px; background: var(--lime); font-size: 0.72rem; font-weight: 900; }
+      .bars { display: grid; gap: 3px; margin-top: 8px; }
+      .bar { display: grid; grid-template-columns: 38px 1fr 30px; gap: 6px; align-items: center; font-size: 0.68rem; font-weight: 800; }
+      .bar span:last-child { text-align: right; }
+      .track { height: 7px; border: 1.5px solid var(--ink); border-radius: 999px; background: var(--white); overflow: hidden; }
+      .track i { display: block; height: 100%; background: var(--lime); }
+      .notice { margin: 0 0 10px; padding: 10px 12px; border: 2px solid var(--ink); border-radius: 10px; background: var(--yellow); font-size: 0.76rem; font-weight: 800; line-height: 1.5; }
+      .retry { margin-top: 8px; padding: 9px 14px; border: 2px solid var(--ink); border-radius: 999px; background: var(--white); font-size: 0.78rem; font-weight: 900; }
+
       .footer { display: flex; justify-content: space-between; gap: 16px; padding-top: 48px; font-size: 0.78rem; font-weight: 800; }
 
       @media (max-width: 700px) {
@@ -116,7 +130,21 @@
         .features, .planner-header, .form { grid-template-columns: 1fr; }
         .features article { min-height: 0; }
         .wide, .submit, .state, .result { grid-column: auto; }
-        .footer { flex-direction: column; }
+        .locate { margin-top: 6px; padding: 7px 10px; border: 2px solid var(--white); border-radius: 999px; background: transparent; color: var(--white); font-size: 0.72rem; font-weight: 800; }
+      .locate:disabled { opacity: 0.5; }
+      .map-wrap { margin-bottom: 12px; }
+      .map { height: 240px; border: 2px solid var(--ink); border-radius: 12px; background: #dde1d8; }
+      .map-note { margin: 6px 0 0; font-size: 0.72rem; font-weight: 700; }
+      .rank { display: inline-flex; width: 22px; height: 22px; align-items: center; justify-content: center; margin-right: 6px; border: 2px solid var(--ink); border-radius: 999px; background: var(--lime); font-size: 0.72rem; font-weight: 900; }
+      .bars { display: grid; gap: 3px; margin-top: 8px; }
+      .bar { display: grid; grid-template-columns: 38px 1fr 30px; gap: 6px; align-items: center; font-size: 0.68rem; font-weight: 800; }
+      .bar span:last-child { text-align: right; }
+      .track { height: 7px; border: 1.5px solid var(--ink); border-radius: 999px; background: var(--white); overflow: hidden; }
+      .track i { display: block; height: 100%; background: var(--lime); }
+      .notice { margin: 0 0 10px; padding: 10px 12px; border: 2px solid var(--ink); border-radius: 10px; background: var(--yellow); font-size: 0.76rem; font-weight: 800; line-height: 1.5; }
+      .retry { margin-top: 8px; padding: 9px 14px; border: 2px solid var(--ink); border-radius: 999px; background: var(--white); font-size: 0.78rem; font-weight: 900; }
+
+      .footer { flex-direction: column; }
       }
 
       @media (prefers-reduced-motion: reduce) {
@@ -172,6 +200,7 @@
         <form class="form" id="detour-form">
           <label class="field">출발 위치
             <input id="origin" name="origin" placeholder="예: 서울숲역" required />
+            <button type="button" id="locate" class="locate">현재 위치 쓰기</button>
           </label>
           <label class="field">도착 위치
             <input id="destination" name="destination" placeholder="예: 성수역" required />
@@ -208,6 +237,10 @@
           <section id="result" class="result" aria-live="polite" hidden>
             <p class="result-title" id="result-title"></p>
             <p class="result-note" id="result-description"></p>
+            <div id="map-wrap" class="map-wrap" hidden>
+              <div id="map" class="map"></div>
+              <p id="map-note" class="map-note"></p>
+            </div>
             <div id="cards" class="cards"></div>
             <p class="footnote">
               남은 시간을 알차게 쓰는 순서입니다. 점수 기반 순위는 Week 4에 추가합니다.
@@ -223,175 +256,566 @@
     </main>
 
     <script>
-      // 이번 주에는 외부 API 대신 직접 만든 장소 20개를 사용합니다.
-      //
-      // 필드 뜻
-      //   id            고유 키. Week 3에서 데이터베이스 primary key로 이어집니다.
-      //   area          지역 묶음. Week 3의 테스트 지역 한 곳 기준입니다.
-      //   activity      산책 | 카페 | 구경 | 문화. 입력 선택지와 1:1로 맞춥니다.
-      //   stayMinutes   그 장소에 머무는 시간(분)
-      //   travelMinutes 왕복 이동 시간(분). Week 4에 카카오 길찾기 값으로 교체합니다.
-      //   cost          1인 예상 비용(원)
-      //   tags          추천 이유를 뒷받침하는 키워드
-      //   reason        Week 1은 고정 문장. Week 4에 점수 근거 기반 자동 생성으로 교체합니다.
-      //
-      // 총 소요 시간 = stayMinutes + travelMinutes
-       // 서버 주소. Week 3에 서버를 배포하면 이 줄만 바꾸면 된다.
-      const API_BASE = "http://127.0.0.1:8000";
-      const places = [
-        { id: "seoulforest-walk", name: "서울숲 산책로", area: "성수·서울숲", activity: "산책", stayMinutes: 22, travelMinutes: 6, cost: 0, tags: ["야외", "무료"], reason: "이동과 산책을 합쳐도 짧은 시간 안에 기분 전환하기 좋아요." },
-        { id: "yeonmujang-walk", name: "성수 연무장길 산책", area: "성수·서울숲", activity: "산책", stayMinutes: 34, travelMinutes: 8, cost: 0, tags: ["야외", "구경 겸용"], reason: "목적지 방향의 골목을 천천히 걸으며 새로운 가게를 발견할 수 있어요." },
-        { id: "hangang-bench", name: "한강 벤치 휴식", area: "성수·서울숲", activity: "산책", stayMinutes: 45, travelMinutes: 10, cost: 0, tags: ["야외", "조용함"], reason: "걷기와 잠깐 쉬는 시간을 함께 넣어도 여유가 있어요." },
-        { id: "eungbongsan-walk", name: "응봉산 짧은 산책", area: "성수·서울숲", activity: "산책", stayMinutes: 65, travelMinutes: 13, cost: 0, tags: ["야외", "전망"], reason: "시간이 충분할 때 서울 풍경을 보고 돌아오기 좋은 코스예요." },
-        { id: "neighborhood-park", name: "동네 공원 한 바퀴", area: "성수·서울숲", activity: "산책", stayMinutes: 16, travelMinutes: 4, cost: 0, tags: ["야외", "가까움"], reason: "30분이 안 되는 짧은 시간에도 가볍게 몸을 움직일 수 있어요." },
 
-        { id: "takeout-coffee", name: "테이크아웃 커피", area: "성수·서울숲", activity: "카페", stayMinutes: 20, travelMinutes: 5, cost: 4500, tags: ["가까움", "빠름"], reason: "이동 시간이 짧아 커피 한 잔을 챙기고도 늦지 않아요." },
-        { id: "seongsu-roastery", name: "성수 로스터리 카페", area: "성수·서울숲", activity: "카페", stayMinutes: 41, travelMinutes: 7, cost: 7000, tags: ["실내", "앉아서 쉬기"], reason: "잠깐 앉아 쉬기 좋고, 목적지와도 멀지 않은 선택이에요." },
-        { id: "book-cafe", name: "북카페 한 시간", area: "성수·서울숲", activity: "카페", stayMinutes: 53, travelMinutes: 9, cost: 8500, tags: ["실내", "조용함"], reason: "커피와 책을 함께 즐기며 남은 시간을 차분히 보낼 수 있어요." },
-        { id: "dessert-cafe", name: "디저트 카페", area: "성수·서울숲", activity: "카페", stayMinutes: 63, travelMinutes: 11, cost: 10000, tags: ["실내", "여유"], reason: "조금 더 긴 여유가 있을 때 달콤한 휴식을 더하기 좋아요." },
-        { id: "bakery-cafe", name: "베이커리 카페", area: "성수·서울숲", activity: "카페", stayMinutes: 30, travelMinutes: 6, cost: 6000, tags: ["실내", "간단한 식사"], reason: "간단한 빵과 음료를 고르기에 알맞은 짧은 코스예요." },
+      // ===== 설정 =====
+      // 서버 주소. 배포하면 이 줄만 바꾼다.
+      const API_BASE = location.hostname.endsWith("github.io")
+        ? ""                               // 서버 배포 전까지는 비워 둔다 → 내장 데이터로 동작
+        : "http://127.0.0.1:8000";
 
-        { id: "indie-bookstore", name: "독립서점 신간 코너", area: "성수·서울숲", activity: "구경", stayMinutes: 24, travelMinutes: 6, cost: 0, tags: ["실내", "무료"], reason: "짧은 시간에도 새로운 책과 문구를 가볍게 둘러볼 수 있어요." },
-        { id: "seongsu-giftshop", name: "성수 소품숍", area: "성수·서울숲", activity: "구경", stayMinutes: 33, travelMinutes: 7, cost: 3000, tags: ["실내", "저예산"], reason: "작은 가게를 둘러보며 부담 없이 기분을 바꾸기 좋아요." },
-        { id: "forest-fleamarket", name: "서울숲 플리마켓", area: "성수·서울숲", activity: "구경", stayMinutes: 49, travelMinutes: 9, cost: 5000, tags: ["야외", "활기참"], reason: "여러 개의 작은 가게를 한 번에 구경할 수 있어요." },
-        { id: "record-shop", name: "레코드숍 탐색", area: "성수·서울숲", activity: "구경", stayMinutes: 62, travelMinutes: 10, cost: 5000, tags: ["실내", "취향"], reason: "좋아하는 음악을 찾으며 여유를 쓰기에 알맞아요." },
-        { id: "stationery-shop", name: "문구점 한 바퀴", area: "성수·서울숲", activity: "구경", stayMinutes: 20, travelMinutes: 4, cost: 2000, tags: ["가까움", "저예산"], reason: "가까운 곳에서 작지만 즐거운 구경을 할 수 있어요." },
+      // 카카오맵 JavaScript 키. 발급받으면 여기에 넣는다.
+      // REST 키와 다른 키다. 브라우저에 노출되므로 콘솔에서 도메인 제한을 건다.
+      const KAKAO_JS_KEY = "";
 
-        { id: "photo-exhibition", name: "작은 사진 전시", area: "성수·서울숲", activity: "문화", stayMinutes: 29, travelMinutes: 6, cost: 3000, tags: ["실내", "짧은 관람"], reason: "짧은 관람으로도 새로운 분위기를 느낄 수 있어요." },
-        { id: "culture-complex", name: "복합문화공간", area: "성수·서울숲", activity: "문화", stayMinutes: 42, travelMinutes: 8, cost: 0, tags: ["실내", "무료"], reason: "전시와 상점을 함께 둘러보기 좋은 실내 선택지예요." },
-        { id: "indie-film-poster", name: "독립영화 포스터 전시", area: "성수·서울숲", activity: "문화", stayMinutes: 56, travelMinutes: 9, cost: 5000, tags: ["실내", "조용함"], reason: "문화 공간을 가볍게 둘러보며 약속 전 시간을 채울 수 있어요." },
-        { id: "small-gallery", name: "소규모 갤러리", area: "성수·서울숲", activity: "문화", stayMinutes: 70, travelMinutes: 12, cost: 8000, tags: ["실내", "여유"], reason: "긴 여유가 있을 때 한 전시를 천천히 감상하기 좋아요." },
-        { id: "library-exhibition", name: "도서관 전시 코너", area: "성수·서울숲", activity: "문화", stayMinutes: 38, travelMinutes: 7, cost: 0, tags: ["실내", "무료"], reason: "비용 부담 없이 조용한 문화생활을 시작할 수 있어요." }
+      // ===== 서버가 없을 때 쓰는 예비 데이터 =====
+      // 서버가 꺼져 있어도 화면이 깨지지 않게 한다.
+      const FALLBACK_PLACES = [
+              {
+                      "id": "seoulforest-walk",
+                      "name": "서울숲 산책로",
+                      "activity": "산책",
+                      "stayMinutes": 22,
+                      "travelMinutes": 6,
+                      "cost": 0,
+                      "tags": [
+                              "야외",
+                              "무료"
+                      ],
+                      "reason": "이동과 산책을 합쳐도 짧은 시간 안에 기분 전환하기 좋아요.",
+                      "lat": 37.5444,
+                      "lng": 127.0374
+              },
+              {
+                      "id": "yeonmujang-walk",
+                      "name": "성수 연무장길 산책",
+                      "activity": "산책",
+                      "stayMinutes": 34,
+                      "travelMinutes": 8,
+                      "cost": 0,
+                      "tags": [
+                              "야외",
+                              "구경 겸용"
+                      ],
+                      "reason": "목적지 방향의 골목을 천천히 걸으며 새로운 가게를 발견할 수 있어요.",
+                      "lat": 37.543,
+                      "lng": 127.055
+              },
+              {
+                      "id": "hangang-bench",
+                      "name": "한강 벤치 휴식",
+                      "activity": "산책",
+                      "stayMinutes": 45,
+                      "travelMinutes": 10,
+                      "cost": 0,
+                      "tags": [
+                              "야외",
+                              "조용함"
+                      ],
+                      "reason": "걷기와 잠깐 쉬는 시간을 함께 넣어도 여유가 있어요.",
+                      "lat": 37.5295,
+                      "lng": 127.07
+              },
+              {
+                      "id": "eungbongsan-walk",
+                      "name": "응봉산 짧은 산책",
+                      "activity": "산책",
+                      "stayMinutes": 65,
+                      "travelMinutes": 13,
+                      "cost": 0,
+                      "tags": [
+                              "야외",
+                              "전망"
+                      ],
+                      "reason": "시간이 충분할 때 서울 풍경을 보고 돌아오기 좋은 코스예요.",
+                      "lat": 37.549,
+                      "lng": 127.033
+              },
+              {
+                      "id": "neighborhood-park",
+                      "name": "동네 공원 한 바퀴",
+                      "activity": "산책",
+                      "stayMinutes": 16,
+                      "travelMinutes": 4,
+                      "cost": 0,
+                      "tags": [
+                              "야외",
+                              "가까움"
+                      ],
+                      "reason": "30분이 안 되는 짧은 시간에도 가볍게 몸을 움직일 수 있어요.",
+                      "lat": 37.546,
+                      "lng": 127.042
+              },
+              {
+                      "id": "takeout-coffee",
+                      "name": "테이크아웃 커피",
+                      "activity": "카페",
+                      "stayMinutes": 20,
+                      "travelMinutes": 5,
+                      "cost": 4500,
+                      "tags": [
+                              "가까움",
+                              "빠름"
+                      ],
+                      "reason": "이동 시간이 짧아 커피 한 잔을 챙기고도 늦지 않아요.",
+                      "lat": 37.545,
+                      "lng": 127.04
+              },
+              {
+                      "id": "seongsu-roastery",
+                      "name": "성수 로스터리 카페",
+                      "activity": "카페",
+                      "stayMinutes": 41,
+                      "travelMinutes": 7,
+                      "cost": 7000,
+                      "tags": [
+                              "실내",
+                              "앉아서 쉬기"
+                      ],
+                      "reason": "잠깐 앉아 쉬기 좋고, 목적지와도 멀지 않은 선택이에요.",
+                      "lat": 37.5447,
+                      "lng": 127.051
+              },
+              {
+                      "id": "book-cafe",
+                      "name": "북카페 한 시간",
+                      "activity": "카페",
+                      "stayMinutes": 53,
+                      "travelMinutes": 9,
+                      "cost": 8500,
+                      "tags": [
+                              "실내",
+                              "조용함"
+                      ],
+                      "reason": "커피와 책을 함께 즐기며 남은 시간을 차분히 보낼 수 있어요.",
+                      "lat": 37.5425,
+                      "lng": 127.0565
+              },
+              {
+                      "id": "dessert-cafe",
+                      "name": "디저트 카페",
+                      "activity": "카페",
+                      "stayMinutes": 63,
+                      "travelMinutes": 11,
+                      "cost": 10000,
+                      "tags": [
+                              "실내",
+                              "여유"
+                      ],
+                      "reason": "조금 더 긴 여유가 있을 때 달콤한 휴식을 더하기 좋아요.",
+                      "lat": 37.541,
+                      "lng": 127.059
+              },
+              {
+                      "id": "bakery-cafe",
+                      "name": "베이커리 카페",
+                      "activity": "카페",
+                      "stayMinutes": 30,
+                      "travelMinutes": 6,
+                      "cost": 6000,
+                      "tags": [
+                              "실내",
+                              "간단한 식사"
+                      ],
+                      "reason": "간단한 빵과 음료를 고르기에 알맞은 짧은 코스예요.",
+                      "lat": 37.5455,
+                      "lng": 127.046
+              },
+              {
+                      "id": "indie-bookstore",
+                      "name": "독립서점 신간 코너",
+                      "activity": "구경",
+                      "stayMinutes": 24,
+                      "travelMinutes": 6,
+                      "cost": 0,
+                      "tags": [
+                              "실내",
+                              "무료"
+                      ],
+                      "reason": "짧은 시간에도 새로운 책과 문구를 가볍게 둘러볼 수 있어요.",
+                      "lat": 37.5438,
+                      "lng": 127.048
+              },
+              {
+                      "id": "seongsu-giftshop",
+                      "name": "성수 소품숍",
+                      "activity": "구경",
+                      "stayMinutes": 33,
+                      "travelMinutes": 7,
+                      "cost": 3000,
+                      "tags": [
+                              "실내",
+                              "저예산"
+                      ],
+                      "reason": "작은 가게를 둘러보며 부담 없이 기분을 바꾸기 좋아요.",
+                      "lat": 37.5435,
+                      "lng": 127.054
+              },
+              {
+                      "id": "forest-fleamarket",
+                      "name": "서울숲 플리마켓",
+                      "activity": "구경",
+                      "stayMinutes": 49,
+                      "travelMinutes": 9,
+                      "cost": 5000,
+                      "tags": [
+                              "야외",
+                              "활기참"
+                      ],
+                      "reason": "여러 개의 작은 가게를 한 번에 구경할 수 있어요.",
+                      "lat": 37.5448,
+                      "lng": 127.039
+              },
+              {
+                      "id": "record-shop",
+                      "name": "레코드숍 탐색",
+                      "activity": "구경",
+                      "stayMinutes": 62,
+                      "travelMinutes": 10,
+                      "cost": 5000,
+                      "tags": [
+                              "실내",
+                              "취향"
+                      ],
+                      "reason": "좋아하는 음악을 찾으며 여유를 쓰기에 알맞아요.",
+                      "lat": 37.542,
+                      "lng": 127.0575
+              },
+              {
+                      "id": "stationery-shop",
+                      "name": "문구점 한 바퀴",
+                      "activity": "구경",
+                      "stayMinutes": 20,
+                      "travelMinutes": 4,
+                      "cost": 2000,
+                      "tags": [
+                              "가까움",
+                              "저예산"
+                      ],
+                      "reason": "가까운 곳에서 작지만 즐거운 구경을 할 수 있어요.",
+                      "lat": 37.5458,
+                      "lng": 127.044
+              },
+              {
+                      "id": "photo-exhibition",
+                      "name": "작은 사진 전시",
+                      "activity": "문화",
+                      "stayMinutes": 29,
+                      "travelMinutes": 6,
+                      "cost": 3000,
+                      "tags": [
+                              "실내",
+                              "짧은 관람"
+                      ],
+                      "reason": "짧은 관람으로도 새로운 분위기를 느낄 수 있어요.",
+                      "lat": 37.5442,
+                      "lng": 127.0495
+              },
+              {
+                      "id": "culture-complex",
+                      "name": "복합문화공간",
+                      "activity": "문화",
+                      "stayMinutes": 42,
+                      "travelMinutes": 8,
+                      "cost": 0,
+                      "tags": [
+                              "실내",
+                              "무료"
+                      ],
+                      "reason": "전시와 상점을 함께 둘러보기 좋은 실내 선택지예요.",
+                      "lat": 37.5432,
+                      "lng": 127.053
+              },
+              {
+                      "id": "indie-film-poster",
+                      "name": "독립영화 포스터 전시",
+                      "activity": "문화",
+                      "stayMinutes": 56,
+                      "travelMinutes": 9,
+                      "cost": 5000,
+                      "tags": [
+                              "실내",
+                              "조용함"
+                      ],
+                      "reason": "문화 공간을 가볍게 둘러보며 약속 전 시간을 채울 수 있어요.",
+                      "lat": 37.5415,
+                      "lng": 127.058
+              },
+              {
+                      "id": "small-gallery",
+                      "name": "소규모 갤러리",
+                      "activity": "문화",
+                      "stayMinutes": 70,
+                      "travelMinutes": 12,
+                      "cost": 8000,
+                      "tags": [
+                              "실내",
+                              "여유"
+                      ],
+                      "reason": "긴 여유가 있을 때 한 전시를 천천히 감상하기 좋아요.",
+                      "lat": 37.5405,
+                      "lng": 127.06
+              },
+              {
+                      "id": "library-exhibition",
+                      "name": "도서관 전시 코너",
+                      "activity": "문화",
+                      "stayMinutes": 38,
+                      "travelMinutes": 7,
+                      "cost": 0,
+                      "tags": [
+                              "실내",
+                              "무료"
+                      ],
+                      "reason": "비용 부담 없이 조용한 문화생활을 시작할 수 있어요.",
+                      "lat": 37.5465,
+                      "lng": 127.045
+              }
       ];
 
-      const totalMinutes = (place) => place.stayMinutes + place.travelMinutes;
+      const totalOf = (p) => p.stayMinutes + p.travelMinutes;
 
-      // 한글 받침에 따라 "로" 와 "으로" 를 골라 줍니다. (성수역으로 / 서울숲으로 / 강남로)
+      // ===== 화면 요소 =====
+      const $ = (id) => document.getElementById(id);
+      const form = $("detour-form");
+      const submitButton = $("submit-button");
+      const loading = $("loading");
+      const message = $("message");
+      const result = $("result");
+      const cards = $("cards");
+      const resultTitle = $("result-title");
+      const resultDescription = $("result-description");
+      const mapWrap = $("map-wrap");
+      const mapNote = $("map-note");
+      const locateButton = $("locate");
+
+      // 한글 받침에 따라 "로"와 "으로"를 고른다. (성수역으로 / 서울숲으로 / 강남로)
       const toParticle = (word) => {
         const code = word.charCodeAt(word.length - 1);
         if (code < 0xac00 || code > 0xd7a3) return `${word}로`;
-        const finalConsonant = (code - 0xac00) % 28;
-        // 받침이 없거나 받침이 'ㄹ'이면 "로", 그 밖에는 "으로"
-        return finalConsonant === 0 || finalConsonant === 8 ? `${word}로` : `${word}으로`;
+        const jong = (code - 0xac00) % 28;
+        return jong === 0 || jong === 8 ? `${word}로` : `${word}으로`;
       };
 
-      const form = document.querySelector("#detour-form");
-      const submitButton = document.querySelector("#submit-button");
-      const loading = document.querySelector("#loading");
-      const message = document.querySelector("#message");
-      const result = document.querySelector("#result");
-      const cards = document.querySelector("#cards");
-      const resultTitle = document.querySelector("#result-title");
-      const resultDescription = document.querySelector("#result-description");
+      const escapeHtml = (text) =>
+        String(text).replace(/[&<>"']/g, (c) =>
+          ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
-      // kind는 "error"(입력을 고쳐야 함)와 "empty"(조건에 맞는 결과가 없음)를 구분합니다.
-      const showMessage = (kind, text) => {
-        message.dataset.kind = kind;
-        message.textContent = text;
+      // ===== 세 가지 상태 =====
+      // error  입력을 고치면 된다
+      // empty  조건에 맞는 결과가 없다 (오류 아님)
+      // down   서버·네트워크 문제. 사용자가 고칠 수 없다 → 다시 시도 버튼을 준다
+      const showMessage = (kind, title, body) => {
+        const retry = kind === "down"
+          ? '<button type="button" class="retry" id="retry">다시 시도하기</button>' : "";
+        message.dataset.kind = kind === "down" ? "error" : kind;
+        message.innerHTML =
+          `<strong>${escapeHtml(title)}</strong>` +
+          (body ? `<br />${escapeHtml(body)}` : "") + retry;
         message.hidden = false;
         result.hidden = true;
         cards.innerHTML = "";
+        const retryButton = $("retry");
+        if (retryButton) retryButton.addEventListener("click", () => form.requestSubmit());
       };
 
-      const renderCards = (candidates, time) => {
-        cards.innerHTML = candidates.map((place) => {
-          const total = totalMinutes(place);
-          const spare = time - total;
-          const tags = place.tags.map((tag) => `<span class="tag">${tag}</span>`).join("");
-          return `
-            <article>
-              <span class="tag">${place.activity}</span>
-              <h3>${place.name}</h3>
-              <p class="breakdown">총 ${total}분 · ${place.cost.toLocaleString()}원</p>
-              <p class="spare">이동 ${place.travelMinutes}분 + 머무는 시간 ${place.stayMinutes}분 · 남은 ${time}분 중 ${spare}분 여유</p>
-              <p>${place.reason}</p>
-              <p>${tags}</p>
-              <small>${place.area} · 이동 시간은 예시 값이며 실제 경로는 다음 주 API 연결 후 계산합니다.</small>
-            </article>
-          `;
-        }).join("");
-      };
-
-            // 서버에 물어본다. 서버가 없으면 null을 돌려준다.
+      // ===== 서버 호출 =====
       const askServer = async (input) => {
+        if (!API_BASE) return { ok: false, kind: "offline" };
         try {
           const response = await fetch(`${API_BASE}/recommend`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(input)
+            body: JSON.stringify({ ...input, limit: 3 })
           });
-          if (!response.ok) return null;
-          const data = await response.json();
-          return data.results;
+          if (response.status === 422) return { ok: false, kind: "invalid" };
+          if (!response.ok) return { ok: false, kind: "down" };
+          return { ok: true, data: await response.json() };
         } catch (error) {
           // 서버가 꺼져 있거나 인터넷이 안 되면 여기로 온다
-          return null;
+          return { ok: false, kind: "offline" };
         }
       };
 
-      const findDetours = async ({ origin, destination, time, budget, activity }) => {
-        // 먼저 서버에 물어본다
-      const fromServer = await askServer({ origin, destination, time, budget, activity });
+      // 서버가 없을 때 브라우저가 직접 계산한다. 서버와 같은 규칙을 쓴다.
+      const localRecommend = ({ time, budget, activity }) =>
+        FALLBACK_PLACES
+          .filter((p) => p.activity === activity && p.cost <= budget && totalOf(p) <= time)
+          .sort((a, b) => totalOf(b) - totalOf(a))
+          .slice(0, 3)
+          .map((p) => ({
+            ...p,
+            totalMinutes: totalOf(p),
+            spareMinutes: time - totalOf(p),
+            reason: p.reason,
+            features: null
+          }));
 
-        // 서버가 답하면 그걸 쓰고, 안 되면 내가 가진 20개로 계산한다
-      const candidates = fromServer !== null
-          ? fromServer
-          : places
-              .filter((place) =>
-                place.activity === activity &&
-                totalMinutes(place) <= time &&
-                place.cost <= budget
-              )
-              .sort((first, second) => totalMinutes(second) - totalMinutes(first))
-              .slice(0, 2);
+      // ===== 결과 그리기 =====
+      const featureBar = (label, value) => `
+        <div class="bar">
+          <span>${label}</span>
+          <span class="track"><i style="width:${Math.round(value * 100)}%"></i></span>
+          <span>${value.toFixed(2)}</span>
+        </div>`;
 
-        if (candidates.length === 0) {
-          showMessage("empty", "지금 조건에 맞는 예시 코스가 없어요. 시간 또는 예산을 조금 늘려보세요.");
+      const renderCards = (items, time) => {
+        cards.innerHTML = items.map((r, index) => {
+          const tags = (r.tags || [])
+            .map((t) => `<span class="tag">${escapeHtml(t)}</span>`).join("");
+          const bars = r.features
+            ? `<div class="bars">
+                 ${featureBar("시간", r.features.time)}
+                 ${featureBar("우회", r.features.detour)}
+                 ${featureBar("예산", r.features.budget)}
+               </div>`
+            : "";
+          return `
+            <article>
+              <h3><span class="rank">${index + 1}</span>${escapeHtml(r.name)}</h3>
+              <p class="breakdown">총 ${r.totalMinutes}분 · ${r.cost.toLocaleString()}원</p>
+              <p class="spare">머무는 ${r.stayMinutes}분 + 이동 ${r.travelMinutes}분 · 남은 ${time}분 중 ${r.spareMinutes}분 여유</p>
+              <p class="reason">${escapeHtml(r.reason || "")}</p>
+              <p>${tags}</p>
+              ${bars}
+            </article>`;
+        }).join("");
+      };
+
+      // ===== 지도 =====
+      let mapInstance = null;
+      const loadKakaoMap = () =>
+        new Promise((resolve) => {
+          if (!KAKAO_JS_KEY) return resolve(false);
+          if (window.kakao && window.kakao.maps) return resolve(true);
+          const script = document.createElement("script");
+          script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_JS_KEY}&autoload=false`;
+          script.onload = () => window.kakao.maps.load(() => resolve(true));
+          script.onerror = () => resolve(false);
+          document.head.appendChild(script);
+        });
+
+      const renderMap = async (items) => {
+        const points = items.filter((r) => r.lat && r.lng);
+        if (points.length === 0) { mapWrap.hidden = true; return; }
+        mapWrap.hidden = false;
+
+        const ready = await loadKakaoMap();
+        if (!ready) {
+          mapNote.textContent = KAKAO_JS_KEY
+            ? "지도를 불러오지 못했어요. 추천 결과는 아래에서 볼 수 있어요."
+            : "지도는 카카오 JavaScript 키를 넣으면 표시됩니다.";
+          $("map").innerHTML = "";
           return;
         }
 
-        message.hidden = true;
-        resultTitle.textContent = `${origin}에서 ${toParticle(destination)} 가는 길의 작은 Detour`;
-        resultDescription.textContent = `${time}분, ${budget.toLocaleString()}원 이하, “${activity}”에 맞춰 고른 예시 추천이에요.`;
-        renderCards(candidates, time);
-        result.hidden = false;
+        const { maps } = window.kakao;
+        const center = new maps.LatLng(points[0].lat, points[0].lng);
+        mapInstance = mapInstance || new maps.Map($("map"), { center, level: 5 });
+        mapInstance.setCenter(center);
+
+        const bounds = new maps.LatLngBounds();
+        points.forEach((p, i) => {
+          const position = new maps.LatLng(p.lat, p.lng);
+          new maps.Marker({ map: mapInstance, position, title: p.name });
+          new maps.CustomOverlay({
+            map: mapInstance, position, yAnchor: 2.0,
+            content: `<div style="padding:2px 7px;border:2px solid #121212;border-radius:999px;background:#c8ff3d;font:800 11px sans-serif">${i + 1}</div>`
+          });
+          bounds.extend(position);
+        });
+        mapInstance.setBounds(bounds);
+        mapNote.textContent = "번호는 추천 순위입니다.";
       };
 
-      form.addEventListener("submit", (event) => {
+      // ===== 현재 위치 =====
+      locateButton.addEventListener("click", async () => {
+        if (!navigator.geolocation) {
+          showMessage("error", "이 브라우저는 위치 기능을 지원하지 않아요.",
+            "출발 위치를 직접 입력해 주세요.");
+          return;
+        }
+        locateButton.disabled = true;
+        locateButton.textContent = "위치 확인 중…";
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            $("origin").value = `${pos.coords.latitude.toFixed(5)},${pos.coords.longitude.toFixed(5)}`;
+            locateButton.disabled = false;
+            locateButton.textContent = "현재 위치 쓰기";
+            message.hidden = true;
+          },
+          () => {
+            // 권한 거부 — 사용자가 고칠 수 있지만 강요하지 않는다.
+            locateButton.disabled = false;
+            locateButton.textContent = "현재 위치 쓰기";
+            showMessage("error", "현재 위치를 사용할 수 없어요.",
+              "위치 권한이 꺼져 있어요. 출발지를 직접 입력하시면 그대로 추천해 드려요.");
+          },
+          { timeout: 8000 }
+        );
+      });
+
+      // ===== 제출 =====
+      form.addEventListener("submit", async (event) => {
         event.preventDefault();
 
-        const origin = document.querySelector("#origin").value.trim();
-        const destination = document.querySelector("#destination").value.trim();
-        const time = Number(document.querySelector("#time").value);
-        const budget = Number(document.querySelector("#budget").value);
-        const activity = document.querySelector("#activity").value;
+        const origin = $("origin").value.trim();
+        const destination = $("destination").value.trim();
+        const time = Number($("time").value);
+        const budget = Number($("budget").value);
+        const activity = $("activity").value;
 
         if (!origin || !destination) {
           showMessage("error", "출발 위치와 도착 위치를 모두 입력해 주세요.");
           return;
         }
-
         if (origin === destination) {
-          showMessage("error", "출발 위치와 도착 위치가 같아요. 서로 다른 곳을 입력해 주세요.");
+          showMessage("error", "출발 위치와 도착 위치가 같아요.", "서로 다른 곳을 입력해 주세요.");
           return;
         }
 
-        // 지금은 브라우저 안에서 바로 계산하지만,
-        // Week 2에는 이 자리에 FastAPI로 보내는 fetch()가 들어갑니다.
-        // 그래서 기다리는 동안의 화면을 미리 만들어 둡니다.
         message.hidden = true;
         result.hidden = true;
         loading.hidden = false;
         submitButton.disabled = true;
         submitButton.setAttribute("aria-busy", "true");
 
-        window.setTimeout(async () => {
-          await findDetours({ origin, destination, time, budget, activity });
-          loading.hidden = true;
-          submitButton.disabled = false;
-          submitButton.removeAttribute("aria-busy");
-        }, 250);
+        const response = await askServer({ origin, destination, time, budget, activity });
+
+        loading.hidden = true;
+        submitButton.disabled = false;
+        submitButton.removeAttribute("aria-busy");
+
+        // 서버가 응답했지만 문제가 있는 경우 — 사용자가 고칠 수 없다
+        if (!response.ok && response.kind === "down") {
+          showMessage("down", "장소 정보를 가져오지 못했어요.",
+            "서버가 잠시 응답하지 않고 있어요. 입력하신 내용은 그대로 남아 있어요.");
+          return;
+        }
+
+        const data = response.ok ? response.data : null;
+        const items = data ? data.results : localRecommend({ time, budget, activity });
+
+        if (items.length === 0) {
+          showMessage("empty", "지금 조건에 맞는 코스가 없어요.",
+            "시간이나 예산을 조금 늘리면 찾을 수 있어요.");
+          return;
+        }
+
+        message.hidden = true;
+        resultTitle.textContent =
+          `${origin}에서 ${toParticle(destination)} 가는 길의 작은 Detour`;
+
+        const notes = [`${time}분, ${budget.toLocaleString()}원 이하, “${activity}”`];
+        if (!data) notes.push("서버에 연결하지 못해 예시 데이터로 보여드려요");
+        else if (data.distanceSource === "example") notes.push("이동 시간은 예시 값이에요");
+        if (data && data.placesAreReal === false) notes.push("장소는 아직 예시입니다");
+        resultDescription.textContent = notes.join(" · ");
+
+        renderCards(items, time);
+        result.hidden = false;
+        renderMap(items);
       });
+
     </script>
   </body>
 </html>

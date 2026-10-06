@@ -1,6 +1,6 @@
 {
   "area": "성수·서울숲",
-  "source": "직접 작성한 예시 데이터 (Week 1)",
+  "source": "직접 작성한 예시 데이터. 좌표는 성수·서울숲 일대의 그럴듯한 위치이며 실제 가게가 아니다.",
   "places": [
     {
       "id": "seoulforest-walk",
@@ -14,7 +14,11 @@
       "tags": [
         "야외",
         "무료"
-      ]
+      ],
+      "lat": 37.5444,
+      "lng": 127.0374,
+      "placeType": "park",
+      "isReal": false
     },
     {
       "id": "yeonmujang-walk",
@@ -28,7 +32,11 @@
       "tags": [
         "야외",
         "구경 겸용"
-      ]
+      ],
+      "lat": 37.543,
+      "lng": 127.055,
+      "placeType": "street",
+      "isReal": false
     },
     {
       "id": "hangang-bench",
@@ -42,7 +50,11 @@
       "tags": [
         "야외",
         "조용함"
-      ]
+      ],
+      "lat": 37.5295,
+      "lng": 127.07,
+      "placeType": "riverside",
+      "isReal": false
     },
     {
       "id": "eungbongsan-walk",
@@ -56,7 +68,11 @@
       "tags": [
         "야외",
         "전망"
-      ]
+      ],
+      "lat": 37.549,
+      "lng": 127.033,
+      "placeType": "park",
+      "isReal": false
     },
     {
       "id": "neighborhood-park",
@@ -70,7 +86,11 @@
       "tags": [
         "야외",
         "가까움"
-      ]
+      ],
+      "lat": 37.546,
+      "lng": 127.042,
+      "placeType": "park",
+      "isReal": false
     },
     {
       "id": "takeout-coffee",
@@ -84,7 +104,11 @@
       "tags": [
         "가까움",
         "빠름"
-      ]
+      ],
+      "lat": 37.545,
+      "lng": 127.04,
+      "placeType": "cafe-takeout",
+      "isReal": false
     },
     {
       "id": "seongsu-roastery",
@@ -98,7 +122,11 @@
       "tags": [
         "실내",
         "앉아서 쉬기"
-      ]
+      ],
+      "lat": 37.5447,
+      "lng": 127.051,
+      "placeType": "cafe-sit",
+      "isReal": false
     },
     {
       "id": "book-cafe",
@@ -112,7 +140,11 @@
       "tags": [
         "실내",
         "조용함"
-      ]
+      ],
+      "lat": 37.5425,
+      "lng": 127.0565,
+      "placeType": "cafe-sit",
+      "isReal": false
     },
     {
       "id": "dessert-cafe",
@@ -126,7 +158,11 @@
       "tags": [
         "실내",
         "여유"
-      ]
+      ],
+      "lat": 37.541,
+      "lng": 127.059,
+      "placeType": "bakery",
+      "isReal": false
     },
     {
       "id": "bakery-cafe",
@@ -140,7 +176,11 @@
       "tags": [
         "실내",
         "간단한 식사"
-      ]
+      ],
+      "lat": 37.5455,
+      "lng": 127.046,
+      "placeType": "bakery",
+      "isReal": false
     },
     {
       "id": "indie-bookstore",
@@ -154,7 +194,11 @@
       "tags": [
         "실내",
         "무료"
-      ]
+      ],
+      "lat": 37.5438,
+      "lng": 127.048,
+      "placeType": "bookstore",
+      "isReal": false
     },
     {
       "id": "seongsu-giftshop",
@@ -168,7 +212,11 @@
       "tags": [
         "실내",
         "저예산"
-      ]
+      ],
+      "lat": 37.5435,
+      "lng": 127.054,
+      "placeType": "giftshop",
+      "isReal": false
     },
     {
       "id": "forest-fleamarket",
@@ -182,7 +230,11 @@
       "tags": [
         "야외",
         "활기참"
-      ]
+      ],
+      "lat": 37.5448,
+      "lng": 127.039,
+      "placeType": "market",
+      "isReal": false
     },
     {
       "id": "record-shop",
@@ -196,7 +248,11 @@
       "tags": [
         "실내",
         "취향"
-      ]
+      ],
+      "lat": 37.542,
+      "lng": 127.0575,
+      "placeType": "giftshop",
+      "isReal": false
     },
     {
       "id": "stationery-shop",
@@ -210,7 +266,11 @@
       "tags": [
         "가까움",
         "저예산"
-      ]
+      ],
+      "lat": 37.5458,
+      "lng": 127.044,
+      "placeType": "giftshop",
+      "isReal": false
     },
     {
       "id": "photo-exhibition",
@@ -224,7 +284,11 @@
       "tags": [
         "실내",
         "짧은 관람"
-      ]
+      ],
+      "lat": 37.5442,
+      "lng": 127.0495,
+      "placeType": "exhibition",
+      "isReal": false
     },
     {
       "id": "culture-complex",
@@ -238,7 +302,11 @@
       "tags": [
         "실내",
         "무료"
-      ]
+      ],
+      "lat": 37.5432,
+      "lng": 127.053,
+      "placeType": "gallery",
+      "isReal": false
     },
     {
       "id": "indie-film-poster",
@@ -252,7 +320,11 @@
       "tags": [
         "실내",
         "조용함"
-      ]
+      ],
+      "lat": 37.5415,
+      "lng": 127.058,
+      "placeType": "exhibition",
+      "isReal": false
     },
     {
       "id": "small-gallery",
@@ -266,7 +338,11 @@
       "tags": [
         "실내",
         "여유"
-      ]
+      ],
+      "lat": 37.5405,
+      "lng": 127.06,
+      "placeType": "gallery",
+      "isReal": false
     },
     {
       "id": "library-exhibition",
@@ -280,7 +356,13 @@
       "tags": [
         "실내",
         "무료"
-      ]
+      ],
+      "lat": 37.5465,
+      "lng": 127.045,
+      "placeType": "library",
+      "isReal": false
     }
-  ]
+  ],
+  "collectedAt": null,
+  "isReal": false
 }
