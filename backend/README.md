@@ -6,10 +6,13 @@ FastAPI 서버. 브라우저가 보낸 조건으로 우회 코스 TOP 3를 점�
 
 ```bash
 cd backend
-.venv/bin/uvicorn main:app --reload --port 8000 --app-dir app
+.venv/bin/uvicorn main:app --reload --port 8001 --app-dir app
 ```
 
-`http://127.0.0.1:8000/docs`에서 직접 호출해볼 수 있다.
+> 8000번이 아니라 8001번을 쓴다. 이 컴퓨터에서 다른 프로젝트가 8000번을 쓰고 있다.
+> 포트가 겹치면 `[Errno 48] Address already in use`가 뜬다.
+
+`http://127.0.0.1:8001/docs`에서 직접 호출해볼 수 있다.
 
 ## 처음 받았다면
 
