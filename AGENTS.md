@@ -75,7 +75,7 @@ API key, `.env` 파일, 실제 개인 정보는 커밋하지 않는다.
 - `docs/PROJECT_CONTEXT.md`: 새 세션과 협업자를 위한 빠른 시작 안내
 - `docs/MVP_DECISION_RULES.md`: MVP의 고정 범위와 새 아이디어 평가 기준
 - `docs/PLACE_RULES.md`: 장소 유형별 체류 시간·비용 규칙표
-- `docs/WEEK2_API_CONTRACT.md`: FastAPI 요청·응답 형식
+- `docs/API.md`: FastAPI Endpoint의 요청·응답 형식
 - `docs/reports/`: 세션별 진행 보고
 
 `docs/COURSE_WEEK1_BRIEF.md`는 수업 기준 기록이며 더 이상 작업 기준이 아니다. 참고용으로만 남긴다.
